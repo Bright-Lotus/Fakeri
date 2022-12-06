@@ -102,3 +102,21 @@ dist
 
 # TernJS port file
 .tern-port
+
+# "Notes" file where I save shit I don't want to delete but also want to conserver
+garbage
+
+# JS where I run experiments and shit
+asdf.js
+yay.js
+
+# Fucking firebase private config
+firebaseConfig.js
+
+# Env (discord token and shit)
+.env
+
+# Reference photos for shit
+banpick_example.png
+bossQuestUI.png
+example.png

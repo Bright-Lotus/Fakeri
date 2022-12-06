@@ -1,0 +1,37 @@
+{
+  "name": "battlebot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon .",
+    "starttest": "nodemon . test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "@napi-rs/canvas": "^0.1.30",
+    "discord.js": "^14.5.0",
+    "dominant-color": "^0.0.1",
+    "dotenv": "^16.0.3",
+    "fast-average-color": "^9.1.1",
+    "fast-average-color-node": "^2.4.0",
+    "ffmpeg": "^0.0.4",
+    "ffprobe-static": "^3.1.0",
+    "firebase": "^9.9.4",
+    "firebase-admin": "^11.2.0",
+    "firebase-functions": "^4.0.1",
+    "fluent-ffmpeg": "^2.1.2",
+    "font-list": "^1.4.5",
+    "image-size": "^1.0.2",
+    "node-fetch": "^2.6.1",
+    "split-images": "^1.0.4",
+    "text-from-image": "^1.1.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.25.0"
+  }
+}
