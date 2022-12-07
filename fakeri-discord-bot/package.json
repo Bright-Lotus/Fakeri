@@ -1,16 +1,16 @@
 {
-  "name": "battlebot",
+  "name": "fakeri",
   "version": "1.0.0",
-  "description": "",
+  "description": "Discord bot for events and duels",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon .",
+    "start": "npm ci && node .",
     "starttest": "nodemon . test"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "ZeldaZamora",
+  "license": "AGPL-3.0-or-later",
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@napi-rs/canvas": "^0.1.30",
