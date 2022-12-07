@@ -2,18 +2,25 @@ const { Client, GatewayIntentBits, Collection, Partials } = require('discord.js'
 const fs = require('node:fs');
 const path = require('node:path');
 
+const http = require('http');
 const dotenv = require('dotenv');
 dotenv.config();
 module.exports = {
-    firebaseConfig: {
-        apiKey: process.env.FIREBASE_API_KEY,
-        authDomain: process.env.FIREBASE_CONFIG_AUTH_DOMAIN,
-        projectId: process.env.FIREBASE_CONFIG_PROJECT_ID,
-        storageBucket: process.env.FIREBASE_CONFIG_STORAGE_BUCKET,
-        messagingSenderId: process.env.FIREBASE_CONFIG_MESSAGING_SENDER_ID,
-        appId: process.env.FIREBASE_CONFIG_APP_ID,
-    },
+	firebaseConfig: {
+		apiKey: process.env.FIREBASE_API_KEY,
+		authDomain: process.env.FIREBASE_CONFIG_AUTH_DOMAIN,
+		projectId: process.env.FIREBASE_CONFIG_PROJECT_ID,
+		storageBucket: process.env.FIREBASE_CONFIG_STORAGE_BUCKET,
+		messagingSenderId: process.env.FIREBASE_CONFIG_MESSAGING_SENDER_ID,
+		appId: process.env.FIREBASE_CONFIG_APP_ID,
+	},
 };
+
+http.createServer(function(req, res) {
+	res.write('Please go to <a href="fakeri.vercel.app">Fakeri Webpage</a>');
+	res.end();
+}).listen(8080);
+
 
 const token = (process.argv[2] != 'test') ? process.env.DISCORD_TOKEN : process.env.DISCORD_TEST_BOT_TOKEN;
 

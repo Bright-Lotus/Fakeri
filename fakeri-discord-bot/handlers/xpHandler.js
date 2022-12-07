@@ -150,7 +150,7 @@ async function xpManager(action, amount, user) {
                     }, { merge: true });
 
                     await updateDoc(doc(db, user.id, 'PlayerInfo'), {
-                        ['eventPoints']: currentXp - docSnap.data().nextLvlXpGoal,
+                        ['eventPoints']: increment(amount),
                     }, { merge: true });
 
                     await updateDoc(doc(db, user.id, 'PlayerInfo'), {
