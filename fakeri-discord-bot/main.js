@@ -16,10 +16,16 @@ module.exports = {
 	},
 };
 
-http.createServer(function(req, res) {
-	res.write('Please go to <a href="fakeri.vercel.app">Fakeri Webpage</a>');
-	res.end();
-}).listen(process.env.PORT);
+fs.readFile('./page.html', function(err, html) {
+
+	if (err) console.error(err);
+
+	http.createServer(function(request, response) {
+		response.writeHeader(200, { 'Content-Type': 'text/html' });
+		response.write(html);
+		response.end();
+	}).listen(process.env.PORT);
+});
 
 
 const token = (process.argv[2] != 'test') ? process.env.DISCORD_TOKEN : process.env.DISCORD_TEST_BOT_TOKEN;
