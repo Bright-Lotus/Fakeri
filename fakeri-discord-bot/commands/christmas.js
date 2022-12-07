@@ -2,7 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder, AttachmentBuilder, ActionRowBuilder, 
 const Canvas = require('@napi-rs/canvas');
 const sizeOf = require('image-size');
 
-const { firebaseConfig } = require('../firebaseConfig.js');
+const { firebaseConfig } = require('../main.js');
 
 const { getFirestore, collection, getDocs, Timestamp } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');

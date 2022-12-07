@@ -4,6 +4,17 @@ const path = require('node:path');
 
 const dotenv = require('dotenv');
 dotenv.config();
+module.exports = {
+    firebaseConfig: {
+        apiKey: process.env.FIREBASE_API_KEY,
+        authDomain: process.env.FIREBASE_CONFIG_AUTH_DOMAIN,
+        projectId: process.env.FIREBASE_CONFIG_PROJECT_ID,
+        storageBucket: process.env.FIREBASE_CONFIG_STORAGE_BUCKET,
+        messagingSenderId: process.env.FIREBASE_CONFIG_MESSAGING_SENDER_ID,
+        appId: process.env.FIREBASE_CONFIG_APP_ID,
+    },
+};
+
 const token = (process.argv[2] != 'test') ? process.env.DISCORD_TOKEN : process.env.DISCORD_TEST_BOT_TOKEN;
 
 // Create a new client instance
@@ -38,3 +49,4 @@ for (const file of eventFiles) {
 
 // Login to Discord with your client's token
 client.login(token);
+

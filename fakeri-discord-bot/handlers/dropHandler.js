@@ -56,7 +56,7 @@
         }); */
 const { getFirestore, collection, getDocs, Timestamp, setDoc, doc, getDoc, updateDoc } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
-const { firebaseConfig } = require('../firebaseConfig.js');
+const { firebaseConfig } = require('../main.js');
 const { AttachmentBuilder, EmbedBuilder, time, TimestampStyles } = require('discord.js');
 const { Colors } = require('../emums/colors.js');
 

@@ -2,7 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder, chatInputApplicationCommandMention, b
 const { getFirestore, getDoc, doc } = require('firebase/firestore');
 
 const { initializeApp } = require('firebase/app');
-const { firebaseConfig } = require('../firebaseConfig.js');
+const { firebaseConfig } = require('../main.js');
 const { CommandIds } = require('../emums/commandIds.js');
 const { Icons } = require('../emums/icons.js');
 

@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, SelectMenuBuilder } = require('discord.js');
 const { getFirestore, doc, setDoc } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
-const { firebaseConfig } = require('../firebaseConfig.js');
+const { firebaseConfig } = require('../main.js');
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);

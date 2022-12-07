@@ -1,6 +1,6 @@
 const { getFirestore, doc, setDoc, getDocs, collection } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
-const { firebaseConfig } = require('../firebaseConfig.js');
+const { firebaseConfig } = require('../main.js');
 const { EmbedBuilder } = require('discord.js');
 
 const app = initializeApp(firebaseConfig);

@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, chatInputApplicationCommandMention } = require('discord.js');
 const { getFirestore, getDoc, doc } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
-const { firebaseConfig } = require('../firebaseConfig.js');
+const { firebaseConfig } = require('../main.js');
 const { pagination } = require('../handlers/paginationHandler.js');
 const { CommandIds } = require('../emums/commandIds.js');
 const { Icons } = require('../emums/icons.js');

@@ -1,6 +1,6 @@
 const { getFirestore, doc, updateDoc, getDoc, arrayUnion, increment, Timestamp } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
-const { firebaseConfig } = require('../firebaseConfig.js');
+const { firebaseConfig } = require('../main.js');
 const { EmbedBuilder, AttachmentBuilder, Events, underscore } = require('discord.js');
 const { xpManager } = require('../handlers/xpHandler.js');
 const path = require('node:path');

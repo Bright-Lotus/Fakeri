@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, ChannelType, PermissionFlagsBits, EmbedBuilder, userMention, channelMention } = require('discord.js');
 const { getFirestore, setDoc, doc, getDoc, increment, updateDoc } = require('firebase/firestore');
 
-const { firebaseConfig } = require('../firebaseConfig.js');
+const { firebaseConfig } = require('../main.js');
 const { initializeApp } = require('firebase/app');
 const { ErrorEmbed, EventErrors } = require('../errors/errors.js');
 

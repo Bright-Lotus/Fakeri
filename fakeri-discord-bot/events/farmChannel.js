@@ -2,7 +2,7 @@ const { EmbedBuilder, ActionRowBuilder, SelectMenuBuilder, Events, bold, undersc
 
 const { getFirestore, doc, getDocs, collection, getDoc } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
-const { firebaseConfig } = require('../firebaseConfig.js');
+const { firebaseConfig } = require('../main.js');
 const { ErrorEmbed, EventErrors } = require('../errors/errors.js');
 const { Icons } = require('../emums/icons.js');
 const app = initializeApp(firebaseConfig);

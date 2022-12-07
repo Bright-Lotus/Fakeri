@@ -1,6 +1,6 @@
 const { getFirestore, updateDoc, getDoc, doc, increment, arrayUnion } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
-const { firebaseConfig } = require('../firebaseConfig.js');
+const { firebaseConfig } = require('../main.js');
 const { Abilities } = require('../emums/abilities.js');
 const { ErrorEmbed, EventErrors } = require('../errors/errors.js');
 const { formatEmoji } = require('discord.js');
