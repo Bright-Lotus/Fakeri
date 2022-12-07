@@ -19,7 +19,7 @@ module.exports = {
 http.createServer(function(req, res) {
 	res.write('Please go to <a href="fakeri.vercel.app">Fakeri Webpage</a>');
 	res.end();
-}).listen(8080);
+}).listen(process.env.PORT);
 
 
 const token = (process.argv[2] != 'test') ? process.env.DISCORD_TOKEN : process.env.DISCORD_TEST_BOT_TOKEN;
