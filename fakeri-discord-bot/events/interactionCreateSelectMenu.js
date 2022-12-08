@@ -1,6 +1,6 @@
 const { getFirestore, doc, setDoc, updateDoc, arrayUnion, getDoc, increment } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
-const { firebaseConfig } = require('../main.js');
+const { firebaseConfig } = require('../firebaseConfig.js');
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -333,6 +333,14 @@ module.exports = {
 };
 
 async function classSelect(interaction) {
+
+    const selectedClass = interaction.values[0];
+
+    const embed = new EmbedBuilder()
+        .setTitle('Destiny has given you your path.')
+        .setDescription(`You have been given ${selectedClass}!`)
+        .setColor('#ffffff');
+    interaction.editReply({ embeds: [embed], components: [] });
     const warriorStats = {
         atk: 30,
         hp: 40,
@@ -366,8 +374,6 @@ async function classSelect(interaction) {
         magicStrength: 30,
         xp: 0,
     };
-
-    const selectedClass = interaction.values[0];
     await setDoc(doc(db, `${interaction.user.id}/PlayerInfo`), { ['gold']: (0) }, { merge: true });
     await setDoc(doc(db, `${interaction.user.id}/PlayerInfo`), { ['xpBonus']: (0) }, { merge: true });
     await setDoc(doc(db, `${interaction.user.id}/PlayerInfo`), { ['playerLvl']: (1) }, { merge: true });
@@ -376,7 +382,6 @@ async function classSelect(interaction) {
     await setDoc(doc(db, `${interaction.user.id}/PlayerInfo`), { ['dead']: false }, { merge: true });
     await setDoc(doc(db, `${interaction.user.id}/PlayerInfo`), { ['activeBuffs']: [] }, { merge: true });
     await setDoc(doc(db, `${interaction.user.id}/PlayerInfo`), { ['eventPoints']: 0 }, { merge: true });
-
 
 
     const desc = 'Esta orbe te da **__+25% ATK__** (**25%** - **75%** ✳️) por tus siguientes **__3__** (**3** - **5** ✳️) ataques.';
@@ -421,9 +426,10 @@ async function classSelect(interaction) {
         default:
             break;
     }
-    const embed = new EmbedBuilder()
-        .setTitle('Destiny has given you your path.')
-        .setDescription(`You have been given ${selectedClass}!`)
-        .setColor('#ffffff');
-    interaction.editReply({ embeds: [embed], components: [] });
+    for (let index = 1; index < 9; index++) {
+        for (let mission = 0; mission < 6; mission++) {
+            await setDoc(doc(db, `${interaction.user.id}/EventQuestProgression/Weekly/Week${index}`), { [`mission${mission}`]: (0) }, { merge: true });
+        }
+    }
+
 }

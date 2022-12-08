@@ -5,16 +5,6 @@ const path = require('node:path');
 const http = require('http');
 const dotenv = require('dotenv');
 dotenv.config();
-module.exports = {
-	firebaseConfig: {
-		apiKey: process.env.FIREBASE_API_KEY,
-		authDomain: process.env.FIREBASE_CONFIG_AUTH_DOMAIN,
-		projectId: process.env.FIREBASE_CONFIG_PROJECT_ID,
-		storageBucket: process.env.FIREBASE_CONFIG_STORAGE_BUCKET,
-		messagingSenderId: process.env.FIREBASE_CONFIG_MESSAGING_SENDER_ID,
-		appId: process.env.FIREBASE_CONFIG_APP_ID,
-	},
-};
 
 fs.readFile('./page.html', function(err, html) {
 
@@ -42,7 +32,10 @@ for (const file of commandFiles) {
 	const command = require(filePath);
 	// Set a new item in the Collection
 	// With the key as the command name and the value as the exported module
-	client.commands.set(command.data.name, command);
+	if (Object.values(command).length > 0) {
+		client.commands.set(command.data.name, command);
+
+	}
 }
 
 const eventsPath = path.join(__dirname, 'events');

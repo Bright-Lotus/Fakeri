@@ -2,7 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder, AttachmentBuilder, ActionRowBuilder, 
 const Canvas = require('@napi-rs/canvas');
 const sizeOf = require('image-size');
 
-const { firebaseConfig } = require('../main.js');
+const { firebaseConfig } = require('../firebaseConfig.js');
 
 const { getFirestore, collection, getDocs, Timestamp } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
@@ -105,9 +105,7 @@ async function milestones(canvasContext, canvas, interaction) {
     const ctx = canvasContext;
 
     userMilestones.forEach(async milestonesDoc => {
-        console.log(milestonesDoc.data().milestone1);
         for (const key in milestonesDoc.data()) {
-            console.log(milestonesDoc.data());
             let xCoordinates = Math.round((((milestonesDoc.data().milestone1.current / milestonesDoc.data().milestone1.goal * 100) - 10) / 100) * 873);
 
             const milestone1 = milestonesDoc.data().milestone1;
@@ -152,7 +150,6 @@ async function milestones(canvasContext, canvas, interaction) {
                     break;
 
                 case 'milestone4':
-                    console.log('4misshewobruh!');
                     ctx.fillStyle = '#000000';
                     ctx.font = '50px "Burbank Big"';
                     ctx.fillText(`${milestone4?.current}/${milestone4Goal}`, 1200, (sizeOf('./questUI1.png').height - 400));
@@ -234,7 +231,6 @@ async function milestones(canvasContext, canvas, interaction) {
 
 async function quests(interaction, weekToDisplay, selectMenu) {
     if (!selectMenu) { interaction.deferReply(); }
-    console.log('asgsgsadg');
 
     const row = new ActionRowBuilder()
         .addComponents(
@@ -295,8 +291,6 @@ async function quests(interaction, weekToDisplay, selectMenu) {
         // doc.data() is never undefined for query doc snapshots
         weeklyQuestsSnap.forEach(async (document) => {
             const ctx = canvas.getContext('2d');
-            console.log((document.id.includes(weekToDisplay.split(' ')[1])), 'bruh!');
-            console.log(doc.id, weekToDisplay);
             if (!document.id.includes(weekToDisplay.split(' ')[1])) {
                 return;
             }

@@ -2,14 +2,14 @@ const { EmbedBuilder, ActionRowBuilder, SelectMenuBuilder, Events, bold, undersc
 
 const { getFirestore, doc, getDocs, collection, getDoc } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
-const { firebaseConfig } = require('../main.js');
+const { firebaseConfig } = require('../firebaseConfig.js');
 const { ErrorEmbed, EventErrors } = require('../errors/errors.js');
 const { Icons } = require('../emums/icons.js');
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 function formatKeyword(keyword, displayName) {
-    return `**${hyperlink(displayName, 'https://blank.page/')}** ${formatEmoji(Icons[keyword])}`;
+    return `**${hyperlink(displayName, 'https://fakeri.parcel.app/keywords/' + keyword.toLowerCase())}** ${formatEmoji(Icons[keyword])}`;
 }
 
 function formatKeywordDesc(keywordSubtype, args) {

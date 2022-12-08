@@ -1,7 +1,7 @@
 const { Events } = require('discord.js');
 const { getFirestore, doc, getDoc } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
-const { firebaseConfig } = require('../main.js');
+const { firebaseConfig } = require('../firebaseConfig.js');
 const { ErrorEmbed, EventErrors } = require('../errors/errors.js');
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);

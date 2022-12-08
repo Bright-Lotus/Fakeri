@@ -1,6 +1,6 @@
 const { getFirestore, doc, getDocs, collection, updateDoc, getDoc, arrayRemove } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
-const { firebaseConfig } = require('../main.js');
+const { firebaseConfig } = require('../firebaseConfig.js');
 const { Events } = require('discord.js');
 
 const app = initializeApp(firebaseConfig);

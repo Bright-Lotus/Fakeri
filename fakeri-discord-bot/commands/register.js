@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, SelectMenuBuilder } = require('discord.js');
 const { getFirestore, doc, setDoc } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
-const { firebaseConfig } = require('../main.js');
+const { firebaseConfig } = require('../firebaseConfig.js');
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -62,9 +62,5 @@ async function register(interaction) {
         .setDescription('**Stats:**\nLess base ATK\nMore base HP\nLess base Speed\nMore base Mana\nHas 3 abilities and 1 ultimate\n\n**Abilities:**\nHeal player for 30% (10 + 1% Magic Power), increased by 20% if the Player is below 30% HP\nWork in progresss')
         .setColor('#00EAFF');
 
-    for (let index = 0; index < 6; index++) {
-        console.log('this is register.js file hewo!');
-        await setDoc(doc(db, `${interaction.user.id}/EventQuestProgression/Weekly/Week1`), { [`mission${index}`]: (0) }, { merge: true });
-    }
     interaction.editReply({ embeds: [classEmbed, warriorEmbed, archerEmbed, enchanterEmbed], components: [row] });
 }

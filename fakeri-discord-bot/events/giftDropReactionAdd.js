@@ -1,6 +1,6 @@
 const { getFirestore, doc, updateDoc, getDoc, arrayUnion, increment, Timestamp } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
-const { firebaseConfig } = require('../main.js');
+const { firebaseConfig } = require('../firebaseConfig.js');
 const { EmbedBuilder, AttachmentBuilder, Events, underscore } = require('discord.js');
 const { xpManager } = require('../handlers/xpHandler.js');
 const path = require('node:path');
@@ -13,7 +13,7 @@ const db = getFirestore(app);
 module.exports = {
     name: Events.MessageReactionAdd,
     once: false,
-    execute: async function (reaction, usr) {
+    execute: async function(reaction, usr) {
         // When a reaction is received, check if the structure is partial
         console.log(reaction, 'logdebug');
         if (reaction.partial) {
