@@ -1,18 +1,20 @@
-const { getFirestore, doc, setDoc, getDocs, collection, updateDoc, getDoc } = require('firebase/firestore');
+const { getFirestore, doc, getDocs, collection, updateDoc, getDoc } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
 const { firebaseConfig } = require('../firebaseConfig.js');
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, bold, underscore } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, bold, underscore, formatEmoji } = require('discord.js');
 const { goldManager } = require('../handlers/goldHandler.js');
 const { EventErrors, ErrorEmbed } = require('../errors/errors.js');
+const { Icons } = require('../emums/icons.js');
 
 module.exports = {
     name: 'interactionCreate',
     async execute(interaction) {
         if (!interaction.isSelectMenu()) return;
         if (!interaction.customId.includes('shopModal-selectMenu')) return;
+        await interaction.deferReply();
         if (interaction.user.id != interaction.customId.split('-')[2]) {
             return interaction.reply({ embeds: [ErrorEmbed(EventErrors.NotOwnerOfInteraction)], ephemeral: true });
         }
@@ -22,9 +24,29 @@ module.exports = {
         let item;
         shopInventory.forEach(async document => {
             item = document.data()[category][`${category.slice(0, -1)}${itemId}`];
-            console.log(document.data());
         });
-        const filter = msg => msg.content.includes('confirmar') || msg.content.includes('rechazar');
+        const filter = msg => msg.content.toLowerCase().includes('confirmar') || msg.content.toLowerCase().includes('rechazar');
+        let itemStr;
+        const playerInfo = (await getDoc(doc(db, interaction.user.id, 'PlayerInfo'))).data();
+        const playerClass = playerInfo.class;
+        const playerGold = playerInfo.gold;
+        const playerLvl = playerInfo.playerLvl;
+        switch (playerClass) {
+            case 'archer':
+                break;
+
+            case 'warrior':
+                itemStr = `\n\n\n***Stats***\n\n**+${item.stats.atk}** - ATK\n**+${item.stats.spd}** - SPD\n\n**Perks**\n\n***${item.perks.perkName || 'Ninguno'}***\n${item.perks.perkDesc || 'Este objeto no tiene ningun perk'}\n\n**Price:** ${item.price} 🪙 ${(playerGold < item.price) ? formatEmoji(Icons.NotEnoughGold) : ''}\n**Minimum Level:** ${item.minLvl || 1} ${Icons.Level} ${(playerLvl < item.minLvl) ? formatEmoji(Icons.NotEnoughLevel) : ''}`;
+                // eslint-disable-next-line no-unused-vars
+                break;
+
+            case 'enchanter':
+                itemStr = `\n\n\n***Stats***\n\n**+${item.stats.magicStrength}** - MAGIC STR\n**+${item.stats.mana}** - MANA\n\n**Perks**\n\n***${item.perks.perkName || 'Ninguno'}***\n${item.perks.perkDesc || 'Este objeto no tiene ningun perk'}\n\n**Price:** ${item.price} 🪙 ${(playerGold < item.price) ? formatEmoji(Icons.NotEnoughGold) : ''}\n**Minimum Level:** ${item.minLvl || 1} ${Icons.Level} ${(playerLvl < item.minLvl) ? formatEmoji(Icons.NotEnoughLevel) : ''}`;
+                break;
+
+            default:
+                break;
+        }
         const confirmationEmbed = new EmbedBuilder()
             .setTitle('Nora')
             .setColor('#C600FF')
@@ -32,7 +54,7 @@ module.exports = {
         const itemEmbed = new EmbedBuilder()
             .setTitle('__' + item.name + '__')
             .setColor('#C600FF')
-            .setDescription(`\n\n\n***Stats***\n\n**+${item.stats.atk}** - ATK\n**+${item.stats.spd}** - SPD\n\n**Perks**\n\n***${item.perks.perkName}***\n${item.perks.perkDesc}\n\n**Price:** ${item.price} 🪙\n**Minimum Level:** ${item.minLvl}`);
+            .setDescription(itemStr);
         const row = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
                 .setCustomId('accept')
@@ -47,7 +69,7 @@ module.exports = {
                 .setEmoji('➡️')
                 .setStyle(ButtonStyle.Danger),
         );
-        interaction.reply({ embeds: [confirmationEmbed, itemEmbed], components: [row, row2], fetchReply: true })
+        interaction.editReply({ embeds: [confirmationEmbed, itemEmbed], components: [row, row2], fetchReply: true })
             .then(() => {
                 interaction.channel.awaitMessages({ filter, max: 1, time: 10000, errors: ['time'] })
                     .then(async collected => {
@@ -70,19 +92,18 @@ module.exports = {
 
                                     const goldEmbed = new EmbedBuilder()
                                         .setTitle('La compra ha sido exitosa')
-                                        .setDescription(`${bold(`Has comprado ${underscore(item.name)} por ${underscore(item.price)} oro`)}\nOro restante: ${result}`)
+                                        .setDescription(`${bold('Has comprado ' + underscore(item.name) + ' por ' + underscore(item.price) + ' oro')}\nOro restante: ${result}`)
                                         .setColor('Gold');
 
                                     const docSnap = await getDoc(doc(db, collected.first().author.id, 'PlayerInfo/Inventory/Equipment'));
-                                    let swordAmount;
+                                    let itemAmount;
                                     if (docSnap.exists()) {
-                                        swordAmount = docSnap.data().swords.amount;
+                                        itemAmount = docSnap.data()?.[`${category}`].amount;
                                     }
 
-                                    console.log(docSnap.data().swords);
-                                    item = { ...item, id: swordAmount + 1 };
+                                    item = { ...item, id: itemAmount + 1 };
                                     await updateDoc(doc(db, collected.first().author.id, 'PlayerInfo/Inventory/Equipment'), {
-                                        [category]: { ...docSnap.data().swords, amount: swordAmount + 1, [`sword${swordAmount + 1}`]: item },
+                                        [category]: { ...docSnap.data()?.[`${category}`], amount: itemAmount + 1, [`${category.slice(0, -1)}${itemAmount + 1}`]: item },
                                     }, { merge: true });
                                     return collected.first().reply({ embeds: [goldEmbed, thanksEmbed], components: [dialogEnd] });
                                 }).catch(error => {
@@ -102,7 +123,7 @@ module.exports = {
                                 .setDescription('Mira lo que te gusta y seleccionalo!\nY deja de desperdiciar mi tiempo.');
                             return collected.first().reply({ embeds: [rejectedEmbed] });
                         }
-                    }).catch(err => {
+                    }).catch(() => {
                         const rejectedEmbed = new EmbedBuilder()
                             .setTitle('Nora')
                             .setColor('#C600FF')

@@ -1,10 +1,4 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, SelectMenuBuilder } = require('discord.js');
-const { getFirestore, doc, setDoc } = require('firebase/firestore');
-const { initializeApp } = require('firebase/app');
-const { firebaseConfig } = require('../firebaseConfig.js');
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('register')
@@ -28,14 +22,14 @@ async function register(interaction) {
                         value: 'Warrior',
                     },
                     {
-                        label: 'Enchanter 🪄',
-                        description: 'Good for support but also deals damage with spells!',
-                        value: 'Enchanter',
-                    },
-                    {
                         label: 'Archer 🏹',
                         description: 'Always waiting for the best shot...',
                         value: 'Archer',
+                    },
+                    {
+                        label: 'Enchanter 🪄',
+                        description: 'Good for support but also deals damage with spells!',
+                        value: 'Enchanter',
                     },
                 ),
         );
@@ -49,12 +43,12 @@ async function register(interaction) {
 
     const warriorEmbed = new EmbedBuilder()
         .setTitle('Warrior 🗡️')
-        .setDescription('**Stats:**\nMore base ATK\nMore base HP\nLess base Speed\n\n**Ability:** Activate to gain +50% - 100% AD (based in player level) for 3 - 5 (based in ability level) attacks.')
+        .setDescription('**Stats:**\nMore base ATK\nMore base HP\nLess base Speed\n\n**Good for damage**')
         .setColor('#F83636');
 
     const archerEmbed = new EmbedBuilder()
         .setTitle('Archer 🏹')
-        .setDescription('**Stats:**\nRegular base ATK\nLess base HP\nMore base Speed\nCan attack from different channels\n\n**Ability:** Prepare an attack for 2 turns, deal 20% (10 + 10% ATK) bonus damage on your next two attacks and gain 20% Speed for 5 attacks.')
+        .setDescription('**Stats:**\nRegular base ATK\nLess base HP\nMore base Speed\nCan attack from different channels\n\n**Good for range**')
         .setColor('#37BC6C');
 
     const enchanterEmbed = new EmbedBuilder()

@@ -4,19 +4,19 @@ module.exports = {
         embedColor: '#C600FF',
         step1: {
             name: 'Nora',
-            message: 'You again?\nCome to bother me again?',
+            message: 'Hola **{displayName}**, espero vengas a comprar algo.',
             options: {
                 option1: {
-                    text: 'I\'m here to buy',
+                    text: 'Ver tienda',
                     emoji: '🛒',
                 },
             },
         },
         step2option1: {
             name: 'Nora',
-            message: 'I have these things',
+            message: 'Esto es lo que tengo actualmente',
             specialFunction: {
-                openShop: true,
+                name: 'openShop',
             },
         },
     },

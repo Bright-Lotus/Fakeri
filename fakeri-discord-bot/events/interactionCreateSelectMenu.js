@@ -1,18 +1,18 @@
-const { getFirestore, doc, setDoc, updateDoc, arrayUnion, getDoc, increment } = require('firebase/firestore');
+const { getFirestore, doc, setDoc, updateDoc, getDoc, increment, arrayUnion } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
 const { firebaseConfig } = require('../firebaseConfig.js');
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const { contextMenuExecute } = require('../commands/christmas.js');
-const { EmbedBuilder, bold, underscore, Embed } = require('discord.js');
+const { EmbedBuilder, bold, underscore } = require('discord.js');
 const { attack } = require('../handlers/attackHandler.js');
 const { ErrorEmbed, EventErrors } = require('../errors/errors.js');
 const { healthManager } = require('../handlers/healthHandler.js');
 const { Abilities } = require('../emums/abilities.js');
 const { pagination } = require('../handlers/paginationHandler.js');
 const { ability } = require('../handlers/abilityHandler.js');
-const { execute } = require('../commands/inventory.js');
+const { dialogHandler } = require('../handlers/dialogHandler.js');
 
 module.exports = {
     name: 'interactionCreate',
@@ -28,7 +28,7 @@ module.exports = {
             return;
         }
 
-        if (interaction.customId.includes('inventoryAbilityOrbsModal-orb1-selectMenu/') || interaction.customId.includes('inventoryAbilityOrbsModal-orb2-selectMenu/')) {
+        if (interaction.customId.includes('inventoryAbilityOrbsModal')) {
             if (interaction.user.id != interaction.customId.split('/')[1]) {
                 return interaction.reply({ embeds: [ErrorEmbed(EventErrors.NotOwnerOfInteraction)], ephemeral: true });
             }
@@ -50,8 +50,11 @@ module.exports = {
                     ['abilityOrbs']: { ...equipped.data().abilityOrbs, [interaction.customId.split('-')[1]]: abilityOrbID },
                 }, { merge: true });
 
+                const playerInfo = await getDoc(doc(db, interaction.user.id, 'PlayerInfo'));
+                let ratio = (playerInfo.data().class != 'enchanter') ? 0.7 : 0.65;
+                if (interaction.customId.split('-')[1] == 'orb5') ratio -= 0.3;
                 await updateDoc(doc(db, interaction.user.id, 'PlayerInfo/Inventory/Equipment'), {
-                    [`abilityOrbs.abilityOrb${abilityOrbID}.requiredMana`]: Math.round(abilityOrb.requiredMana * 0.7),
+                    [`abilityOrbs.abilityOrb${abilityOrbID}.requiredMana`]: Math.round(abilityOrb.requiredMana * ratio),
                 }, { merge: true });
 
                 const equippedEmbed = new EmbedBuilder()
@@ -105,6 +108,7 @@ module.exports = {
             }
             return;
         }
+
 
         if (interaction.customId.includes('battleFlow-selectMenu/')) {
             if (interaction.user.id != interaction.customId.split('/')[1]) {
@@ -213,11 +217,13 @@ module.exports = {
         }
         if (interaction.customId.includes('battleFlow-selectMenu-activeBattle/')) {
             console.log(interaction.customId.split('-'), 'debug202');
+
             if (interaction.user.id != interaction.customId.split('/')[1]) {
                 return interaction.reply({ embeds: [ErrorEmbed(EventErrors.NotOwnerOfInteraction)], ephemeral: true });
             }
             await interaction.deferReply();
             const idSplit = interaction.values[0].split('-');
+            console.log(idSplit, 'interaction debug select flow');
             const enemyUnique = idSplit[4];
             console.log(enemyUnique, 'debugunique');
 
@@ -337,10 +343,12 @@ async function classSelect(interaction) {
     const selectedClass = interaction.values[0];
 
     const embed = new EmbedBuilder()
-        .setTitle('Destiny has given you your path.')
-        .setDescription(`You have been given ${selectedClass}!`)
+        .setTitle('El Destino te ha dado tu camino')
+        .setAuthor({ name: 'Piedra del Destino' })
+        .setDescription(`Te ha sido dado ${selectedClass}!`)
         .setColor('#ffffff');
     interaction.editReply({ embeds: [embed], components: [] });
+    await dialogHandler('postRegisterTutorial', 1, interaction, '', 'register', { replied: true });
     const warriorStats = {
         atk: 30,
         hp: 40,
@@ -374,7 +382,6 @@ async function classSelect(interaction) {
         magicStrength: 30,
         xp: 0,
     };
-    await setDoc(doc(db, `${interaction.user.id}/PlayerInfo`), { ['gold']: (0) }, { merge: true });
     await setDoc(doc(db, `${interaction.user.id}/PlayerInfo`), { ['xpBonus']: (0) }, { merge: true });
     await setDoc(doc(db, `${interaction.user.id}/PlayerInfo`), { ['playerLvl']: (1) }, { merge: true });
     await setDoc(doc(db, `${interaction.user.id}/PlayerInfo`), { ['nextLvlXpGoal']: (400) }, { merge: true });
@@ -382,6 +389,7 @@ async function classSelect(interaction) {
     await setDoc(doc(db, `${interaction.user.id}/PlayerInfo`), { ['dead']: false }, { merge: true });
     await setDoc(doc(db, `${interaction.user.id}/PlayerInfo`), { ['activeBuffs']: [] }, { merge: true });
     await setDoc(doc(db, `${interaction.user.id}/PlayerInfo`), { ['eventPoints']: 0 }, { merge: true });
+    await setDoc(doc(db, 'Event/Players'), { ['members']: arrayUnion({ id: interaction.user.id }) }, { merge: true });
 
 
     const desc = 'Esta orbe te da **__+25% ATK__** (**25%** - **75%** ✳️) por tus siguientes **__3__** (**3** - **5** ✳️) ataques.';
@@ -398,10 +406,33 @@ async function classSelect(interaction) {
         minLvl: 1,
     };
 
+    const woodenSword = {
+        name: 'Espada de Madera',
+        id: 3,
+        minLvl: 1,
+        stats: {
+            atk: 5,
+            spd: 1,
+        },
+        perks: {},
+    };
+
+    const rockWand = {
+        name: 'Varita de roca',
+        id: 1,
+        minLvl: 1,
+        perks: {},
+        stats: {
+            magicStrength: 5,
+            mana: 5,
+        },
+    };
+
 
     switch (selectedClass.toLowerCase()) {
         case 'warrior':
-            await setDoc(doc(db, `${interaction.user.id}/PlayerInfo/Inventory/Equipment`), { ['swords']: { amount: 0 } });
+            await setDoc(doc(db, `${interaction.user.id}/PlayerInfo/Inventory/Equipment`), { ['swords']: { amount: 1, sword1: woodenSword } });
+            await setDoc(doc(db, `${interaction.user.id}/PlayerInfo`), { ['gold']: (3) }, { merge: true });
             await setDoc(doc(db, `${interaction.user.id}/PlayerInfo/Inventory/Equipped`), { ['sword']: {} }, { merge: true });
             await setDoc(doc(db, `${interaction.user.id}/PlayerInfo/Inventory/Equipped`), { ['abilityOrbs']: {} }, { merge: true });
 
@@ -413,14 +444,23 @@ async function classSelect(interaction) {
 
         case 'archer':
             await setDoc(doc(db, `${interaction.user.id}/PlayerInfo`), { ['class']: (selectedClass.toLowerCase()) }, { merge: true });
+            await setDoc(doc(db, `${interaction.user.id}/PlayerInfo`), { ['gold']: (3) }, { merge: true });
+
             await setDoc(doc(db, `${interaction.user.id}/PlayerInfo`), { ['stats']: (archerStats) }, { merge: true });
             await setDoc(doc(db, `${interaction.user.id}/PlayerInfo/Inventory/Equipment`), { ['bows']: { amount: 0 } }, { merge: true });
             break;
 
         case 'enchanter':
+            await setDoc(doc(db, `${interaction.user.id}/PlayerInfo/Inventory/Equipment`), { ['wands']: { amount: 1, wand1: rockWand } });
+            await setDoc(doc(db, `${interaction.user.id}/PlayerInfo`), { ['gold']: (6) }, { merge: true });
+
+            await setDoc(doc(db, `${interaction.user.id}/PlayerInfo/Inventory/Equipped`), { ['wand']: {} }, { merge: true });
+            await setDoc(doc(db, `${interaction.user.id}/PlayerInfo/Inventory/Equipped`), { ['abilityOrbs']: {} }, { merge: true });
+
+            await setDoc(doc(db, `${interaction.user.id}/PlayerInfo/Inventory/Equipment`), { ['abilityOrbs']: { amount: 1, abilityOrb1: empoweredAttacks } }, { merge: true });
+            await setDoc(doc(db, `${interaction.user.id}/PlayerInfo/Inventory/Equipment`), { ['armorPlates']: { amount: 0 } }, { merge: true });
             await setDoc(doc(db, `${interaction.user.id}/PlayerInfo`), { ['class']: (selectedClass.toLowerCase()) }, { merge: true });
             await setDoc(doc(db, `${interaction.user.id}/PlayerInfo`), { ['stats']: (enchanterStats) }, { merge: true });
-            await setDoc(doc(db, `${interaction.user.id}/PlayerInfo/Inventory/Equipment`), { ['wands']: { amount: 0 } }, { merge: true });
             break;
 
         default:

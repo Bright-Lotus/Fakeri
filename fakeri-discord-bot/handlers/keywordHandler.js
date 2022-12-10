@@ -1,4 +1,4 @@
-const { getFirestore, doc, getDoc, updateDoc, increment, setDoc, arrayUnion } = require('firebase/firestore');
+const { getFirestore, doc, updateDoc, increment } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
 const { firebaseConfig } = require('../firebaseConfig.js');
 
@@ -18,7 +18,7 @@ async function keywordHandler(keyword, keywordSubtype, enemy, user, args) {
                     enemyArmor: 'placeholder',
                     enemySpd: 'placeholder',
                     enemyMagicDurability: 'placeholder',
-                    enemyElite: 'placeholder',
+                    enemyElite: 0,
                     enemyUnique: enemy.enemyUnique,
                     enemyXp: 'placeholder',
                     enemyGold: 'placeholder',
@@ -27,7 +27,7 @@ async function keywordHandler(keyword, keywordSubtype, enemy, user, args) {
                 };
                 for (const key in enemy) {
                     const property = enemy[key];
-                    if (key == 'enemyId' || key == 'turn' || key == 'enemyUnique' || key == 'keywords' || key == 'enemyHp') continue;
+                    if (key == 'enemyId' || key == 'turn' || key == 'enemyUnique' || key == 'keywords' || key == 'enemyHp' || key == 'enemyElite') continue;
                     finalEnemy[key] = Math.floor(property / 100 * args.ratio);
                 }
                 finalEnemy.enemyHp = finalEnemy.enemyMaxHp;
@@ -42,7 +42,14 @@ async function keywordHandler(keyword, keywordSubtype, enemy, user, args) {
                 }
                 return Promise.resolve({ enemySplitted: true });
             }
+            break;
         }
+
+        case 'Hardened':
+            break;
+
+        case 'Elusive':
+            break;
 
         default:
             break;

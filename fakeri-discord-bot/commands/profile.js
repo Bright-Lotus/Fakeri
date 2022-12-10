@@ -1,15 +1,16 @@
 const { SlashCommandBuilder, EmbedBuilder, chatInputApplicationCommandMention, bold, formatEmoji, underscore, italic, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { getFirestore, getDoc, doc } = require('firebase/firestore');
-
-const { initializeApp } = require('firebase/app');
-const { firebaseConfig } = require('../firebaseConfig.js');
 const { CommandIds } = require('../emums/commandIds.js');
 const { Icons } = require('../emums/icons.js');
+
+const { getFirestore, getDoc, doc } = require('firebase/firestore');
+const { initializeApp } = require('firebase/app');
+const { firebaseConfig } = require('../firebaseConfig.js');
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const { getAverageColor } = require('fast-average-color-node');
+const { Utils } = require('../utils.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -19,11 +20,18 @@ module.exports = {
     async execute(interaction) {
         await profile(interaction);
     },
+    async contextMenuExecute(interaction, args) {
+        await profile(interaction, args);
+    },
 };
 
 
-async function profile(interaction) {
-    const playerID = interaction.options.getUser('jugador')?.id || interaction.user.id;
+async function profile(interaction, args) {
+    await interaction.deferReply();
+    let playerID = interaction.options.getUser('jugador')?.id || interaction.user.id;
+    if (args.contextMenu) {
+        playerID = interaction.targetId;
+    }
     const playerUser = await interaction.guild.members.fetch(playerID);
     const playerInfo = await getDoc(doc(db, playerID, 'PlayerInfo'));
 
@@ -40,8 +48,8 @@ async function profile(interaction) {
 
         const statRow = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
-                .setCustomId('goldBtn')
-                .setLabel(`${playerInfo.data().gold} - Oro`)
+                .setCustomId(`goldBtn-${playerInfo.data().gold}`)
+                .setLabel(`${Utils.NumberFormatWithLetter(playerInfo.data().gold)} - Oro`)
                 .setStyle(ButtonStyle.Primary)
                 .setEmoji(Icons.Gold),
             new ButtonBuilder()
@@ -55,14 +63,13 @@ async function profile(interaction) {
                 .setStyle(ButtonStyle.Primary)
                 .setEmoji('💫'),
             new ButtonBuilder()
-                .setCustomId('eventPointsBtn')
-                .setLabel(`${playerInfo.data().eventPoints} - Puntos Evento`)
+                .setCustomId(`eventPointsBtn-${playerInfo.data().eventPoints}`)
+                .setLabel(`${Utils.NumberFormatWithLetter(playerInfo.data().eventPoints)} - Puntos Evento`)
                 .setStyle(ButtonStyle.Success)
                 .setEmoji('✨'),
         );
 
         await getAverageColor(playerUser.displayAvatarURL({ extension: 'jpg' })).then(color => {
-            console.log(color);
             profileEmbed.setColor(color.hex);
         });
         let hpEmoji = '';
@@ -76,23 +83,13 @@ async function profile(interaction) {
 
         const statEmoji = (stat) => {
             switch (stat) {
-                case 'hp':
-                    return hpEmoji;
-
-                case 'atk':
-                    return Icons.ATK;
-
-                case 'mana':
-                    return formatEmoji(Icons.Mana);
-
-                case 'armor':
-                    return Icons.Armor;
-
-                case 'magicDurability':
-                    return Icons.MagicDurability;
-
-                case 'speed':
-                    return Icons.SPD;
+                case 'hp': return hpEmoji;
+                case 'atk': return Icons.ATK;
+                case 'mana': return formatEmoji(Icons.Mana);
+                case 'armor': return Icons.Armor;
+                case 'magicDurability': return Icons.MagicDurability;
+                case 'speed': return Icons.SPD;
+                case 'magicStrength': return Icons.MagicStrength;
 
                 default:
                     break;
@@ -122,7 +119,7 @@ async function profile(interaction) {
                 },
             );
         }
-        interaction.reply({ embeds: [profileEmbed], components: [statRow] });
+        interaction.editReply({ embeds: [profileEmbed], components: [statRow] });
     }
 
 }

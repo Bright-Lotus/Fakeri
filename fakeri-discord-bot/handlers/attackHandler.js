@@ -1,4 +1,4 @@
-const { getFirestore, doc, getDoc, updateDoc, arrayRemove, arrayUnion, deleteDoc, deleteField, increment } = require('firebase/firestore');
+const { getFirestore, doc, getDoc, updateDoc, arrayRemove, arrayUnion, deleteField, increment } = require('firebase/firestore');
 const { xpManager } = require('./xpHandler.js');
 const { goldManager } = require('./goldHandler.js');
 const { healthManager } = require('./healthHandler.js');
@@ -31,6 +31,9 @@ async function attack(user, enemy) {
             if (playerInfoSnap.exists()) {
                 const playerAtk = playerInfoSnap.data().stats.atk;
                 const finalDamage = (Math.sign(playerAtk - enemyArmor) == -1) ? 0 : playerAtk - enemyArmor;
+                console.log('🚀 ~ file: attackHandler.js:34 ~ returnnewPromise ~ finalDamage', finalDamage);
+                console.log(turn, 'turndebugattack1');
+
 
                 const finalEnemy = {
                     enemyId: enemyId,
@@ -49,13 +52,20 @@ async function attack(user, enemy) {
                 };
 
                 if (turn == 'enemy') {
+                    console.log(turn, finalEnemy.turn, 'turndebugattack2');
+
                     finalEnemy.turn = 'player';
+                    console.log(turn, finalEnemy.turn, 'turndebugattack3');
+
                     const enemyDmg = enemyAtk - playerInfoSnap.data().stats.armor;
                     if (Math.sign(enemyDmg) == -1) {
+                        await updateDoc(doc(db, user.id, 'ActiveBattles'), {
+                            [`battles.battle${enemy}`]: finalEnemy,
+                        }, { merge: true });
                         return resolve({ enemyAttacked: true, damageReceived: 0, remainingHp: playerInfoSnap.data().stats.hp });
                     }
                     let remainingHp;
-                    let dead;
+                    let dead = false;
                     await healthManager('damage', user, enemyDmg).then(results => {
                         if (results.dead) {
                             dead = true;
@@ -69,6 +79,7 @@ async function attack(user, enemy) {
                     await updateDoc(doc(db, user.id, 'ActiveBattles'), {
                         [`battles.battle${enemy}`]: finalEnemy,
                     }, { merge: true });
+                    console.log(await (await getDoc(doc(db, user.id, 'ActiveBattles'))).data().battles, 'awaitawaidoc');
                     return resolve({ enemyAttacked: true, damageReceived: enemyDmg, remainingHp: remainingHp });
                 }
 
@@ -104,8 +115,9 @@ async function attack(user, enemy) {
 
                 finalEnemy.enemyHp = finalEnemy.enemyHp - finalDamage;
                 finalEnemy.turn = (finalEnemy.turn == 'player') ? 'enemy' : 'player';
+                console.log(finalEnemy, 'debugattackenemy');
                 if (finalEnemy.enemyHp <= 0) {
-                    await xpManager('give', enemyXp, user);
+                    await xpManager('give', enemyXp, user).then(console.log);
                     await goldManager('give', enemyGold, user);
                     await updateDoc(doc(db, user.id, 'ActiveBattles'), {
                         [`battles.battle${enemy}`]: deleteField(),
@@ -118,14 +130,14 @@ async function attack(user, enemy) {
                         await Promise.all(finalEnemy.keywords.map(async keyword => {
                             if (keyword.type != 'LastBreath') return;
                             await keywordHandler(keyword.type, keyword.subtype, finalEnemy, user, { ratio: keyword.ratio }).then(results => {
-                                resolveResults = { enemyKilled: true, xp: enemyXp, gold: enemyGold, damageDone: finalDamage, enemySplitted: results.enemySplitted };
+                                resolveResults = { enemyKilled: true, xp: ((enemyXp / 100) * (playerInfo.data().xpBonus + 100)), gold: enemyGold, damageDone: finalDamage, enemySplitted: results.enemySplitted };
                             });
                             return true;
                         }));
 
                         if (resolveResults?.enemyKilled) return resolve(resolveResults);
                     }
-                    return resolve({ enemyKilled: true, xp: enemyXp, gold: enemyGold, damageDone: finalDamage });
+                    return resolve({ enemyKilled: true, xp: ((enemyXp / 100) * (playerInfo.data().xpBonus + 100)), gold: enemyGold, damageDone: finalDamage });
                 }
 
                 await updateDoc(doc(db, user.id, 'ActiveBattles'), {

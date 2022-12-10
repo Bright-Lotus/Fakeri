@@ -28,7 +28,7 @@ module.exports = {
 				await mp4toframe('C:/Users/djblu/BattleBot/tenorgif.mp4', './').then(async () => {
 					await ReadText('./tn.png').then(async (text) => {
 						console.log((text.includes('hello chat')));
-						if (text.includes('hello chat') == false && text.includes('goodbye chat') == false) {
+						if (!text.includes('hello chat') && !text.includes('goodbye chat')) {
 							const dimensions = sizeOf('./tn.png');
 							const chunkSize = dimensions.height / 2;
 
@@ -75,9 +75,9 @@ module.exports = {
 };
 
 async function fetchFile(url) {
-	await fetch(url).then(function (resp) {
+	await fetch(url).then(function(resp) {
 		return resp.blob();
-	}).then(async function (blob) {
+	}).then(async function(blob) {
 		let buffer = await blob.arrayBuffer();
 		buffer = Buffer.from(buffer);
 		fs.createWriteStream('tenorgif.mp4').write(buffer);

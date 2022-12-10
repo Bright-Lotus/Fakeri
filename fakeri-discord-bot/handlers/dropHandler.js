@@ -54,7 +54,7 @@
             embeds: [portalLaserParticles],
             files: [new AttachmentBuilder('https://files.catbox.moe/ttxpld.mp4', { name: 'portal_laser_charging.mp4' })],
         }); */
-const { getFirestore, collection, getDocs, Timestamp, setDoc, doc, getDoc, updateDoc } = require('firebase/firestore');
+const { getFirestore, Timestamp, doc, getDoc, updateDoc } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
 const { firebaseConfig } = require('../firebaseConfig.js');
 const { AttachmentBuilder, EmbedBuilder, time, TimestampStyles } = require('discord.js');
@@ -70,7 +70,7 @@ async function giftsDrop(client) {
     const channels = await getDoc(doc(db, 'Event/GiftDrops'));
     const msgs = [];
     const giftColors = ['Blue', 'Green', 'Red', 'Pink', 'Purple', 'Yellow'];
-    let randomItem = giftColors[Math.floor(Math.random() * giftColors.length)];
+    const randomItem = giftColors[Math.floor(Math.random() * giftColors.length)];
     if (channels.exists()) {
         Object.entries(channels.data()).forEach(async channel => {
             for (let index = 0; index < 2; index++) {
@@ -85,9 +85,7 @@ async function giftsDrop(client) {
                     });
                 }
                 catch (e) {
-                    if (e.code == 50001) {
-                        console.log('Access to guild denied, probably due to the bot not being in said server.');
-                    }
+                    console.log('');
                 }
 
                 if (giftDropsChannel == undefined) return;
@@ -112,7 +110,7 @@ async function giftsDrop(client) {
                 const date2 = new Date().getTime();
                 const diffDay = (+date2) - (+dropTime);
                 if (new Date().getHours() > dropTime.getHours()) return;
-                console.log(Math.abs(diffDay) - 36e5);
+                // for later console.log(Math.abs(diffDay) - 36e5);
 
 
                 const timeout1 = setTimeout((diff, dropsChannel) => {
@@ -121,7 +119,7 @@ async function giftsDrop(client) {
                     dropsChannel.sendTyping();
                     const portalBlue = new EmbedBuilder()
                         .setTitle('A mysterious portal has appeared in the sky! 🧿')
-                        .setDescription(`Preliminar analysis tell something may come out of it ${dropTimeVerbal(Math.floor(dropTime.getTime() / 1000), TimestampStyles.RelativeTime)}`)
+                        .setDescription(`Preliminar analysis tell something may come out of it ${time(Math.floor(dropTime.getTime() / 1000), TimestampStyles.RelativeTime)}`)
                         .setColor('#1370E4');
 
                     dropsChannel.send({

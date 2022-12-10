@@ -1,4 +1,6 @@
 const { giftsDrop } = require('../handlers/dropHandler');
+const figlet = require('figlet');
+const chalk = require('chalk');
 
 module.exports = {
 	name: 'ready',
@@ -8,6 +10,31 @@ module.exports = {
 		setInterval(async () => {
 			await giftsDrop(client);
 		}, (36e5 * 24));
-		console.log(`Thy bot shalt obey thou commands! Logged in as ${client.user.tag}`);
+		figlet('Fakeri', {
+			font: 'Graffiti',
+			horizontalLayout: 'default',
+			verticalLayout: 'default',
+			width: 80,
+			whitespaceBreak: true,
+		}, (err, data) => {
+			if (err) {
+				console.error(err);
+				return;
+			}
+			console.log(chalk.blueBright(data));
+			figlet('Online', {
+				font: 'Graffiti',
+				horizontalLayout: 'default',
+				verticalLayout: 'default',
+				width: 80,
+				whitespaceBreak: true,
+			}, (err, dataOnline) => {
+				if (err) {
+					console.error(err);
+					return;
+				}
+				console.log(chalk.greenBright(dataOnline));
+			});
+		});
 	},
 };

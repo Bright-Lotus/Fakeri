@@ -1,8 +1,8 @@
 const { Events } = require('discord.js');
+const { ErrorEmbed, EventErrors } = require('../errors/errors.js');
 const { getFirestore, doc, getDoc } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
 const { firebaseConfig } = require('../firebaseConfig.js');
-const { ErrorEmbed, EventErrors } = require('../errors/errors.js');
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -30,7 +30,12 @@ module.exports = {
         }
         catch (error) {
             console.error(error);
-            await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+            if (interaction?.deferred || interaction?.replied) {
+                await interaction.editReply({ content: 'There was an error while executing this command!', ephemeral: true });
+            }
+            else {
+                await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+            }
         }
         console.log(`${interaction.user.tag} in #${interaction.channel.name} triggered an interaction.`);
     },

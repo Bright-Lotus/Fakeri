@@ -1,27 +1,29 @@
-const { getFirestore, getDocs, collection } = require('firebase/firestore');
+const { getFirestore, getDocs, collection, getDoc, doc } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
 const { firebaseConfig } = require('../firebaseConfig.js');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, SelectMenuBuilder } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, SelectMenuBuilder, formatEmoji } = require('discord.js');
+const { Icons } = require('../emums/icons.js');
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 module.exports = {
-    async execute(action, interaction, page, previousEmbeds, category, actionArguments) {
-        return shop(action, interaction, page, previousEmbeds, category, actionArguments);
+    async execute(action, interaction, page, previousEmbeds, category) {
+        return shop(action, interaction, page, previousEmbeds, category);
     },
 };
 
-async function shop(action, interaction, page, previousEmbeds, category, actionArguments) {
+async function shop(action, interaction, page, previousEmbeds, category) {
     const shopInventory = await getDocs(collection(db, '/Event/Shop/ShopInventory'));
-    const userClass = await getDocs(collection(db, interaction.user.id));
+    const playerInfo = await getDoc(doc(db, interaction.user.id, 'PlayerInfo'));
     let playerClass;
     let playerGold;
-    userClass.forEach(async stats => {
-        playerClass = stats.data().class;
-        playerGold = stats.data().gold;
-        console.log(playerClass);
-    });
+    let playerLvl;
+    if (playerInfo.exists()) {
+        playerClass = playerInfo.data().class;
+        playerGold = playerInfo.data().gold;
+        playerLvl = playerInfo.data().playerLvl;
+    }
     const shopEmbed = new EmbedBuilder();
     const paginationRow = new ActionRowBuilder();
     let maxPages;
@@ -47,8 +49,10 @@ async function shop(action, interaction, page, previousEmbeds, category, actionA
     }
     if (category) items = category;
     if (!category) category = items;
+
     console.log(shopInventory);
     shopInventory.forEach(async (document) => {
+
         console.log(document.data());
         // Max items minus one
         maxPages = Object.entries(document.data()[items]).length;
@@ -66,6 +70,8 @@ async function shop(action, interaction, page, previousEmbeds, category, actionA
 
         const itemsArray = Object.entries(document.data()[items]);
         console.log(Object.entries(document.data()[items]), 'jaja el pepe');
+        const element = itemsArray[currentItem][1];
+        let itemStr;
         switch (playerClass) {
             case 'archer':
                 shopEmbed.setTitle('Archer Items').setColor('#37BC6C');
@@ -73,55 +79,64 @@ async function shop(action, interaction, page, previousEmbeds, category, actionA
 
             case 'warrior':
                 shopEmbed.setTitle('Warrior Items').setColor('#F83636');
+                itemStr = `\n\n\n***Stats***\n\n**+${element.stats.atk}** - ATK\n**+${element.stats.spd}** - SPD\n\n**Perks**\n\n***${element.perks.perkName || 'Ninguno'}***\n${element.perks.perkDesc || 'Este objeto no tiene ningun perk'}\n\n**Price:** ${element.price} 🪙 ${(playerGold < element.price) ? formatEmoji(Icons.NotEnoughGold) : ''}\n**Minimum Level:** ${element.minLvl || 1} ${Icons.Level} ${(playerLvl < element.minLvl) ? formatEmoji(Icons.NotEnoughLevel) : ''}`;
                 // eslint-disable-next-line no-unused-vars
-
-
-                for (const _keyIgnore in document.data()[items]) {
-                    console.log(currentItem, itemsProcessed, maxItemsInPage, 'sadfasd');
-                    if (itemsProcessed > maxItemsInPage) {
-                        return;
-                    }
-                    console.log(currentItem, 'log4');
-                    if (!Object.entries(document.data()[items])[currentItem]) {
-                        return;
-                    }
-                    itemsArray.sort((a, b) => {
-                        return (Number(a[0].match(/\d+/g)[0]) - Number(b[0].match(/\d+/g)[0]));
-                    });
-                    const element = itemsArray[currentItem][1];
-                    if (!element) return;
-
-
-                    shopEmbed.setDescription(`**Oro actual:** ${playerGold} 🪙`);
-                    shopEmbed.addFields(
-                        {
-                            name: '__' + element.name + '__',
-                            value: `\n\n\n***Stats***\n\n**+${element.stats.atk}** - ATK\n**+${element.stats.spd}** - SPD\n\n**Perks**\n\n***${element.perks.perkName}***\n${element.perks.perkDesc}\n\n**Price:** ${element.price} 🪙\n**Minimum Level:** ${element.minLvl}`,
-                            inline: true,
-                        },
-                    );
-
-                    selectMenu.addOptions(
-                        {
-                            label: `${element.name} - ${element.price} GOLD`,
-                            description: element.perks.perkDesc,
-                            value: `shopModal-item-buy-${itemsArray[currentItem][0].match(/\d+/g)[0]}-${category}`,
-                        },
-                    );
-
-                    console.log(currentItem, 'log0000');
-                    itemsProcessed += 1;
-                    currentItem += 1;
-                    console.log(currentItem, 'log0001');
-                }
                 break;
 
             case 'enchanter':
-                shopEmbed.setTitle('Enchanter Items').setColor('##00EAFF');
+                shopEmbed.setTitle('Enchanter Items').setColor('#00EAFF');
+                itemStr = `\n\n\n***Stats***\n\n**+${element.stats.magicStrength}** - MAGIC STR\n**+${element.stats.mana}** - MANA\n\n**Perks**\n\n***${element.perks.perkName || 'Ninguno'}***\n${element.perks.perkDesc || 'Este objeto no tiene ningun perk'}\n\n**Price:** ${element.price} 🪙 ${(playerGold < element.price) ? formatEmoji(Icons.NotEnoughGold) : ''}\n**Minimum Level:** ${element.minLvl || 1} ${Icons.Level} ${(playerLvl < element.minLvl) ? formatEmoji(Icons.NotEnoughLevel) : ''}`;
                 break;
 
             default:
                 break;
+        }
+
+        for (const __key in document.data()[items]) {
+            let itemEmoji = Icons.ShopBtn;
+            if (playerLvl < element.minLvl) {
+                itemEmoji = Icons.NotEnoughLevel;
+            }
+            else if (playerGold < element.price) {
+                itemEmoji = Icons.NotEnoughGold;
+            }
+
+            console.log(currentItem, itemsProcessed, maxItemsInPage, 'sadfasd');
+            if (itemsProcessed > maxItemsInPage) {
+                return;
+            }
+            console.log(currentItem, 'log4');
+            if (!Object.entries(document.data()[items])[currentItem]) {
+                return;
+            }
+            itemsArray.sort((a, b) => {
+                return (Number(a[0].match(/\d+/g)[0]) - Number(b[0].match(/\d+/g)[0]));
+            });
+            if (!element) return;
+
+
+            shopEmbed.setDescription(`**Oro actual:** ${playerGold} 🪙`);
+            shopEmbed.addFields(
+                {
+                    name: '__' + element.name + '__',
+                    value: itemStr,
+                    inline: true,
+                },
+            );
+
+            selectMenu.addOptions(
+                {
+                    label: `${element.name} - ${element.price} GOLD`,
+                    description: `${element.perks?.perkDesc || 'No tiene perks'}`,
+                    value: `shopModal-item-buy-${itemsArray[currentItem][0].match(/\d+/g)[0]}-${category}`,
+                    emoji: itemEmoji,
+                },
+            );
+
+            console.log(currentItem, 'log0000');
+            itemsProcessed += 1;
+            currentItem += 1;
+            console.log(currentItem, 'log0001');
         }
     });
     console.log(shopEmbed);
@@ -149,10 +164,12 @@ async function shop(action, interaction, page, previousEmbeds, category, actionA
             new ButtonBuilder()
                 .setCustomId(`shopModal-seeAbilityOrbs-${interaction.user.id}`)
                 .setLabel('See Ability Orbs')
+                .setEmoji(Icons.AbilityOrb)
                 .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
                 .setCustomId(`shopModal-seeArmorPlates-${interaction.user.id}`)
                 .setLabel('See Armor Plates')
+                .setEmoji(Icons.Armor)
                 .setStyle(ButtonStyle.Primary),
         );
 

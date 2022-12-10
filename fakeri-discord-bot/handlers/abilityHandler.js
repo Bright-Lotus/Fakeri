@@ -4,6 +4,7 @@ const { firebaseConfig } = require('../firebaseConfig.js');
 const { Abilities } = require('../emums/abilities.js');
 const { ErrorEmbed, EventErrors } = require('../errors/errors.js');
 const { formatEmoji } = require('discord.js');
+const { Icons } = require('../emums/icons.js');
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -17,7 +18,7 @@ async function ability(abilityID, enemy, user) {
         if (playerEquipment.exists()) {
             abilityOrb = playerEquipment.data().abilityOrbs[`abilityOrb${abilityID}`];
             if (playerInfo.data().stats.mana < abilityOrb.requiredMana) {
-                return reject(ErrorEmbed(EventErrors.NotEnoughMana, `Necesitas **${abilityOrb.requiredMana - playerInfo.data().stats.mana}** ${formatEmoji('1045827771311599696')} mas para cargar este orbe.`));
+                return reject(ErrorEmbed(EventErrors.NotEnoughMana, `Necesitas **${abilityOrb.requiredMana - playerInfo.data().stats.mana}** ${formatEmoji(Icons.Mana)} mas para cargar este orbe.`));
             }
         }
         if (playerInfo.exists()) {

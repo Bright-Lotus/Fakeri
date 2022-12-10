@@ -32,13 +32,11 @@ module.exports = {
     name: Events.MessageCreate,
     once: false,
     execute: async function(message) {
-        console.log(message.author.bot);
         if (message.author.bot) return;
         const farmChannelsSnap = await getDoc(doc(db, message.guild.id, 'FarmChannels'));
         const monsterSnap = await getDocs(collection(db, '/Event/Enemies/RegularMonsters'));
         let farmChannels = [];
         if (farmChannelsSnap.exists()) {
-            console.log(farmChannelsSnap.data(), 'debug 1');
             for (let i = 1; i < (farmChannelsSnap.data().channelCount + 1); i++) {
                 if (farmChannelsSnap.data()[`channel${i}`].id == message.channel.id) {
                     farmChannels.push(farmChannelsSnap.data()[`channel${i}`]);
@@ -46,7 +44,6 @@ module.exports = {
             }
         }
 
-        console.log(farmChannels);
         farmChannels = farmChannels.filter(element => { return element !== undefined; });
         const passed = [];
         farmChannels.forEach(element => {
@@ -106,13 +103,13 @@ module.exports = {
                     message.channel.sendTyping();
                     farmChannels.forEach(async element => {
                         if (playerInfo.data().playerLvl < element.minLvl) {
-                            return message.reply({ embeds: [ErrorEmbed(EventErrors.NotEnoughLevelForZone, `Necesitas ser nivel ${bold(element.minLvl)} ${Icons.Level}, eres nivel ${bold(playerInfo.data().playerLvl)} ${Icons.Level} ahora mismo.`)] });
+                            return message.reply({ embeds: [ErrorEmbed(EventErrors.NotEnoughLevelForZone, `Necesitas ser nivel ${Icons.Level} ${bold(element.minLvl)}\nEres nivel ${Icons.Level} ${bold(playerInfo.data().playerLvl)} ahora mismo.`)] });
                         }
                         element.enemies.forEach(monsters => {
                             monsterSnap.forEach(async monsterDoc => {
                                 const monster = monsterDoc.data()[`enemy${monsters}`];
                                 monster.elite = Math.random() < 0.3;
-                                const randomProperty = function (obj) {
+                                const randomProperty = function(obj) {
                                     const keys = Object.keys(obj);
 
                                     return keys[Math.floor(Math.random() * keys.length)];
@@ -221,7 +218,7 @@ module.exports = {
                                         {
                                             label: `${battleEnemy.name} ${(battle.enemyElite != '0') ? eliteStr : ''}`,
                                             description: (`${(battleEnemy.ability) ? battleEnemy.ability.abilityDesc : 'No special Properties!'}`),
-                                            value: `battle-attack-monster-${battle.enemyId}-${battle.enemyUnique}-${activeBattles.data().battles.length}`,
+                                            value: `battle-attack-monster-${battle.enemyId}-${battle.enemyUnique}-${activeBattles.data().battles.amount}`,
                                             emoji: (battle.enemyElite != '0') ? Icons.Elite : Icons.Attack,
                                         },
                                     );
@@ -279,7 +276,6 @@ module.exports = {
                                         },
                                     );
 
-                                    console.log('start options');
                                     let eliteStr;
                                     if (battle.enemyElite != '0') {
                                         eliteStr = `- ${formatEmoji(Icons.Elite)} ${battle.enemyElite.split(':')[0].toUpperCase()}: ${battle.enemyElite.split(':')[1].toUpperCase()}`;
@@ -292,7 +288,6 @@ module.exports = {
                                             value: `battle-ability-monster-${battle.enemyId}-${battle.enemyUnique}-${activeBattles.data().battles.length}${abilityStr}`,
                                         },
                                     );
-                                    console.log('end options');
                                     return true;
                                 }
                             }));
@@ -302,12 +297,9 @@ module.exports = {
 
                             const activeBattleRow = new ActionRowBuilder();
                             activeBattleRow.addComponents(activeBattleSelectMenu);
-                            console.log(row.components);
-                            console.log('start repl');
                             return message.reply({ embeds: [activeBattlesListEmbed], components: [activeBattleRow] });
                         }
                     }
-                    console.log(hasActiveBattles, 'debug');
                     break;
 
                 case 'ultimate':

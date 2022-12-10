@@ -1,10 +1,18 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, userMention, bold } = require('discord.js');
 const { execute } = require('./shopHandler');
+const { updateDoc, doc } = require('firebase/firestore');
 
-async function dialogHandler(dialogName, step, interaction, option, category) {
-    const dialogPath = path.join(__dirname, '..', 'dialogs', 'en_US', category);
+const { getFirestore } = require('firebase/firestore');
+const { initializeApp } = require('firebase/app');
+const { firebaseConfig } = require('../firebaseConfig.js');
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+async function dialogHandler(dialogName, step, interaction, option, category, args) {
+    const dialogPath = path.join(__dirname, '..', 'dialogs', 'es_ES', category);
     const dialogFiles = fs.readdirSync(dialogPath).filter(file => file.endsWith('.js'));
 
     for (const file of dialogFiles) {
@@ -19,9 +27,13 @@ async function dialogHandler(dialogName, step, interaction, option, category) {
 
             const dialogEmbed = new EmbedBuilder();
             if (step == 1) {
+                let embedMessage = dialog.dialog.step1.message;
+                if (embedMessage.includes('{displayName}')) {
+                    embedMessage = embedMessage.replace('{displayName}', interaction.member.displayName);
+                }
                 dialogEmbed
                     .setTitle(dialog.dialog.step1.name)
-                    .setDescription(dialog.dialog.step1.message)
+                    .setDescription(embedMessage)
                     .setColor(dialog.dialog.embedColor);
 
                 if (dialog?.dialog[`step${step}`]?.options) {
@@ -38,13 +50,23 @@ async function dialogHandler(dialogName, step, interaction, option, category) {
                 }
 
                 if (dialog?.dialog[`step${step}`]?.options) {
-                    return interaction.reply({ embeds: [dialogEmbed], components: [row] });
+                    if (args?.replied) {
+                        return interaction.followUp({ embeds: [dialogEmbed], components: [row], ephemeral: dialog.dialog?.ephemeral || false });
+                    }
+                    return interaction.reply({ embeds: [dialogEmbed], components: [row], ephemeral: dialog.dialog?.ephemeral || false });
                 }
                 else {
-                    return interaction.reply({ embeds: [dialogEmbed] });
+                    if (args?.replied) {
+                        return interaction.followUp({ embeds: [dialogEmbed], ephemeral: dialog.dialog?.ephemeral || false });
+                    }
+                    return interaction.reply({ embeds: [dialogEmbed], ephemeral: dialog.dialog?.ephemeral || false });
                 }
             }
             else {
+                let embedMessage = dialog.dialog[`step${step}option${option}`].message;
+                if (embedMessage.includes('{displayName}')) {
+                    embedMessage = embedMessage.replace('{displayName}', interaction.member.displayName);
+                }
                 dialogEmbed
                     .setTitle(dialog.dialog[`step${step}option${option}`].name)
                     .setDescription(dialog.dialog[`step${step}option${option}`].message)
@@ -63,18 +85,143 @@ async function dialogHandler(dialogName, step, interaction, option, category) {
                     }
                 }
 
+                if (dialog?.dialog[`step${step}option${option}`]?.msgColor) {
+                    dialogEmbed.setColor(dialog?.dialog[`step${step}option${option}`]?.msgColor);
+                }
+
 
                 if (dialog?.dialog[`step${step}option${option}`]?.options) {
-                    return interaction.channel.send({ embeds: [dialogEmbed], components: [row] });
+                    switch (dialog?.dialog[`step${step}option${option}`]?.specialFunction?.name) {
+                        case 'openShop': {
+                            const shopMessage = await execute('open', interaction, 1, []);
+                            interaction.channel.send(shopMessage);
+                            if (dialog.dialog?.ephemeral) {
+                                if (interaction?.deferred || interaction?.replied) { return interaction.followUp({ embeds: [dialogEmbed], components: [row], ephemeral: true }); }
+                                else { return interaction.reply({ embeds: [dialogEmbed], components: [row], ephemeral: true }); }
+                            }
+                            else {
+                                return interaction.channel.send({ embeds: [dialogEmbed], components: [row] });
+                            }
+                        }
+                        case 'continueDialogInAnotherChannel': {
+                            const targetChannels = dialog?.dialog[`step${step}option${option}`]?.specialFunction.targetChannels.split('|');
+                            targetChannels.forEach(channelID => {
+                                interaction.guild.channels.fetch(channelID)
+                                    .then((channel) => {
+                                        if (dialog.dialog?.ephemeral) {
+                                            if (interaction?.deferred || interaction?.replied) {
+                                                return interaction.followUp({ embeds: [dialogEmbed], components: [row], ephemeral: true });
+                                            }
+                                            else {
+                                                return interaction.reply({ embeds: [dialogEmbed], components: [row], ephemeral: true });
+                                            }
+                                        }
+                                        else {
+                                            return channel.send({ content: userMention(interaction.user.id), embeds: [dialogEmbed], components: [row] });
+                                        }
+                                    })
+                                    .catch(() => console.log('Access denied'));
+                            });
+                            break;
+                        }
+                        case 'setActiveDialog': {
+                            const target = dialog?.dialog[`step${step}option${option}`]?.specialFunction?.target;
+                            const [targetCharacter, targetDialog] = [target.split('/')[0], target.split('/')[1]];
+                            await updateDoc(doc(db, interaction.user.id, 'EventDialogProgression'), {
+                                [`${targetCharacter}.activeDialog`]: targetDialog,
+                            }, { merge: true });
+                            if (dialog.dialog?.ephemeral) {
+                                if (interaction?.deferred || interaction?.replied) { return interaction.followUp({ embeds: [dialogEmbed], components: [row], ephemeral: true }); }
+                                else { return interaction.reply({ embeds: [dialogEmbed], components: [row], ephemeral: true }); }
+                            }
+                            else {
+                                return interaction.channel.send({ embeds: [dialogEmbed], components: [row] });
+                            }
+                        }
+                        case 'giveQuest': {
+                            const targetQuest = dialog?.dialog[`step${step}option${option}`]?.specialFunction?.quest;
+                            const targetCharacterQuest = dialog?.dialog[`step${step}option${option}`]?.specialFunction?.questCharacter;
+                            const questEmbed = new EmbedBuilder()
+                                .setTitle(`${targetCharacterQuest} te ha dado una nueva mision!`)
+                                .setColor(dialog.dialog.embedColor)
+                                .setDescription(bold(targetQuest.mission));
+                            await updateDoc(doc(db, `Event/Quests${targetCharacterQuest}`), {
+                                [`quest${targetQuest.position}`]: targetQuest,
+                            }, { merge: true });
+                            if (dialog.dialog?.ephemeral) {
+                                if (interaction?.deferred || interaction?.replied) { return interaction.followUp({ embeds: [dialogEmbed, questEmbed], components: [row], ephemeral: true }); }
+                                else { return interaction.reply({ embeds: [dialogEmbed], components: [row], ephemeral: true }); }
+                            }
+                            else {
+                                return interaction.channel.send({ embeds: [dialogEmbed, questEmbed], components: [row] });
+                            }
+                        }
+                        default:
+                            if (dialog.dialog?.ephemeral) {
+                                if (interaction?.deferred || interaction?.replied) { return interaction.followUp({ embeds: [dialogEmbed], components: [row], ephemeral: true }); }
+                                else { return interaction.reply({ embeds: [dialogEmbed], components: [row], ephemeral: true }); }
+                            }
+                            else {
+                                return interaction.channel.send({ embeds: [dialogEmbed], components: [row] });
+                            }
+                    }
                 }
                 else {
-                    if (dialog?.dialog[`step${step}option${option}`]?.specialFunction?.openShop) {
-                        console.log(dialogEmbed, 'log45');
-                        const shopMessage = await execute('open', interaction, 1, []);
-                        interaction.channel.send(shopMessage);
-                        return interaction.channel.send({ embeds: [dialogEmbed] });
+                    switch (dialog?.dialog[`step${step}option${option}`]?.specialFunction.name) {
+                        case 'openShop': {
+                            const shopMessage = await execute('open', interaction, 1, []);
+                            interaction.channel.send(shopMessage);
+                            return interaction.channel.send({ embeds: [dialogEmbed], ephemeral: dialog.dialog?.ephemeral || false });
+                        }
+                        case 'continueDialogInAnotherChannel': {
+                            const targetChannels = dialog?.dialog[`step${step}option${option}`]?.specialFunction.targetChannels.split('|');
+                            targetChannels.forEach(channelID => {
+                                interaction.guild.channels.fetch(channelID)
+                                    .then((channel) => {
+                                        if (dialog.dialog?.ephemeral) {
+                                            if (interaction?.deferred || interaction?.replied) { return interaction.followUp({ embeds: [dialogEmbed], ephemeral: true }); }
+                                            else { return interaction.reply({ embeds: [dialogEmbed], ephemeral: true }); }
+                                        }
+                                        else { return channel.send({ content: userMention(interaction.user.id), embeds: [dialogEmbed] }); }
+                                    })
+                                    .catch(() => console.log('Access denied'));
+                            });
+                            break;
+                        }
+                        case 'setActiveDialog': {
+                            const target = dialog?.dialog[`step${step}option${option}`]?.specialFunction?.target;
+                            const [targetCharacter, targetDialog] = [target.split('/')[0], target.split('/')[1]];
+                            await updateDoc(doc(db, interaction.user.id, 'EventDialogProgression'), { [`${targetCharacter}.activeDialog`]: targetDialog }, { merge: true });
+                            if (dialog.dialog?.ephemeral) {
+                                if (interaction?.deferred || interaction?.replied) { return interaction.followUp({ embeds: [dialogEmbed], ephemeral: true }); }
+                                else { return interaction.reply({ embeds: [dialogEmbed], ephemeral: true }); }
+                            }
+                            else { return interaction.channel.send({ embeds: [dialogEmbed] }); }
+                        }
+                        case 'giveQuest': {
+                            const targetQuest = dialog?.dialog[`step${step}option${option}`]?.specialFunction?.quest;
+                            const targetCharacterQuest = dialog?.dialog[`step${step}option${option}`]?.specialFunction?.questCharacter;
+                            const questEmbed = new EmbedBuilder()
+                                .setTitle(`${targetCharacterQuest} te ha dado una nueva mision!`)
+                                .setColor(dialog.dialog.embedColor)
+                                .setDescription(bold(targetQuest.mission));
+                            await updateDoc(doc(db, `Event/Quests${targetCharacterQuest}`), {
+                                [`quest${targetQuest.position}`]: targetQuest,
+                            }, { merge: true });
+                            if (dialog.dialog?.ephemeral) {
+                                if (interaction?.deferred || interaction?.replied) { return interaction.followUp({ embeds: [dialogEmbed, questEmbed], ephemeral: true }); }
+                                else { return interaction.reply({ embeds: [dialogEmbed], ephemeral: true }); }
+                            }
+                            else {
+                                return interaction.channel.send({ embeds: [dialogEmbed, questEmbed] });
+                            }
+                        }
                     }
-                    return interaction.channel.send({ embeds: [dialogEmbed] });
+                    if (dialog.dialog?.ephemeral) {
+                        if (interaction?.deferred || interaction?.replied) { return interaction.followUp({ embeds: [dialogEmbed], ephemeral: true }); }
+                        else { return interaction.reply({ embeds: [dialogEmbed], ephemeral: true }); }
+                    }
+                    else { return interaction.channel.send({ embeds: [dialogEmbed] }); }
                 }
             }
 

@@ -6,6 +6,7 @@ const Colors = Object.freeze(
         Pink: '#DD00D0',
         Purple: '#8200DD',
         Yellow: '#DDDA00',
+        NoraColor: '#C600FF',
     },
 );
 

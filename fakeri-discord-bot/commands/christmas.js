@@ -4,8 +4,9 @@ const sizeOf = require('image-size');
 
 const { firebaseConfig } = require('../firebaseConfig.js');
 
-const { getFirestore, collection, getDocs, Timestamp } = require('firebase/firestore');
+const { getFirestore, collection, getDocs, Timestamp, getDoc, doc } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
+const { pagination } = require('../handlers/paginationHandler.js');
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -13,7 +14,10 @@ const db = getFirestore(app);
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('event')
-        .setDescription('Informacion acerca de cosas evento.')
+        .setDescription('Informacion acerca de cosas relacionadas con el evento.')
+        .addSubcommand(subcmd =>
+            subcmd.setName('leaderboard').setDescription('Mira la tabla de puntuacion del evento'),
+        )
         .addSubcommand(subcommand =>
             subcommand
                 .setName('quests')
@@ -29,10 +33,10 @@ module.exports = {
                         ),
                 )
                 .addStringOption(option => option.setName('arguments').setDescription('Additional arguments.'))),
-    execute: async function(interaction) {
+    execute: async function (interaction) {
         await event(interaction);
     },
-    contextMenuExecute: async function(interaction, selected) {
+    contextMenuExecute: async function (interaction, selected) {
         await quests(interaction, selected, true);
     },
 };
@@ -41,62 +45,29 @@ async function event(interaction) {
     if (interaction.options.getSubcommand() === 'quests') {
         await quests(interaction, interaction.options.getString('category'), false);
     }
-    if (interaction.options.getSubcommand() === 'test') {
-        const giftEventTime = new Date(Date.now());
-        const christmasChannel = interaction.guild.channels.cache.get('1032013306631827546');
-        giftEventTime.setHours(giftEventTime.getHours() + 1);
-        christmasChannel.send(`<t:${Math.floor(giftEventTime.getTime() / 1000)}:R>`);
-        const giftEmbed = new EmbedBuilder()
-            .setTitle('A gift has fallen from the sky! 🎁')
-            .setDescription('React with 🫳 to open it! We have to reach 10 helpers!')
-            .setColor('#137FE4');
+    if (interaction.options.getSubcommand() === 'leaderboard') {
+        await leaderboard(interaction);
+    }
+}
 
-        const portalBlue = new EmbedBuilder()
-            .setTitle('A mysterious portal has appeared in the sky! 🧿')
-            .setDescription(`Preliminar analysis tell something may come out of it <t:${Math.floor(giftEventTime.getTime() / 1000)}:R>`)
-            .setColor('#137FE4');
-
-        const portalLaserNoParticles = new EmbedBuilder()
-            .setTitle('Another portal has appeared in the heights of the sky! 🌫️')
-            .setDescription(`Portal experts say it may become dangerous <t:${Math.floor(giftEventTime.getTime() / 1000)}:R>\nPortal experts also say it's emanating a kind of Dark Energy/Magic.`)
-            .setColor('#DE00FF');
-
-        const portalLaserParticles = new EmbedBuilder()
-            .setTitle('UPDATE: The pink portal is charging a laser! 🌩️')
-            .setDescription('Analysis show high energy signatures meaning a probable laser of destruction\n\n"The path that the laser will take, is going to hit and obliterate the gift, also obliterating the reward."\n- Nakthiji (Portal Analysis Team)')
-            .setColor('#DE00FF');
-
-        christmasChannel.send({ embeds: [giftEmbed], files: [new AttachmentBuilder('https://files.catbox.moe/hgnbea.mp4', { name: 'gift_fall_blue.mp4' })] }).then(msg => {
-            msg.react('🫳');
+async function leaderboard(interaction) {
+    await interaction.deferReply();
+    const players = await getDoc(doc(db, 'Event/Players'));
+    const usersArray = [];
+    if (players.exists()) {
+        for await (const user of players.data().members) {
+            const eventPts = await (await getDoc(doc(db, user.id, 'PlayerInfo'))).data().eventPoints;
+            await interaction.client.users.fetch(user.id).then(usr => {
+                usersArray.push({ id: usr.id, eventPts: eventPts, name: usr.username });
+            });
+        }
+        const sortedArray = usersArray.sort((a, b) => {
+            return b.eventPts - a.eventPts;
         });
-        const giftOpenedEmbed = new EmbedBuilder()
-            .setTitle('Goal achieved! 🎉')
-            .setDescription('The gift has opened! The rewards have been given to everyone who helped open it')
-            .setColor('#137FE4')
-            .addFields(
-                { name: 'If you didn\'t react before...', value: 'React with 🎁 to this message to claim your rewards!' },
-            );
-        christmasChannel.send({
-            embeds: [giftOpenedEmbed],
-            files: [new AttachmentBuilder('https://files.catbox.moe/jy0dyu.mp4', { name: 'opening_gift.mp4' })],
-        }).then(msg => {
-            msg.react('🎁');
-        });
-
-        christmasChannel.send({
-            embeds: [portalBlue],
-            files: [new AttachmentBuilder('https://files.catbox.moe/p57xmr.mp4', { name: 'portal_blue.mp4' })],
-        });
-
-        christmasChannel.send({
-            embeds: [portalLaserNoParticles],
-            files: [new AttachmentBuilder('https://files.catbox.moe/36rc24.mp4', { name: 'portal_laser.mp4' })],
-        });
-
-        christmasChannel.send({
-            embeds: [portalLaserParticles],
-            files: [new AttachmentBuilder('https://files.catbox.moe/ttxpld.mp4', { name: 'portal_laser_charging.mp4' })],
-        });
+        console.log(sortedArray);
+        await pagination('leaderboard', sortedArray, 1, interaction.user).then(results => {
+            interaction.editReply({ embeds: [results.embed], components: [results.paginationRow] });
+        })
     }
 }
 
@@ -110,13 +81,13 @@ async function milestones(canvasContext, canvas, interaction) {
 
             const milestone1 = milestonesDoc.data().milestone1;
             const milestone2 = milestonesDoc.data().milestone2;
-            const milestone3 = milestonesDoc.data().milestone3 | 0;
+            const __milestone3 = milestonesDoc.data().milestone3 | 0;
             const milestone4 = milestonesDoc.data().milestone4 | 0;
             const milestone5 = milestonesDoc.data().milestone5 | 0;
 
             const milestone1Goal = milestonesDoc.data().milestone1?.goal;
-            const milestone2Goal = milestonesDoc.data().milestone2?.goal | 0;
-            const milestone3Goal = milestonesDoc.data().milestone3?.goal | 0;
+            const __milestone2Goal = milestonesDoc.data().milestone2?.goal | 0;
+            const __milestone3Goal = milestonesDoc.data().milestone3?.goal | 0;
             const milestone4Goal = milestonesDoc.data().milestone4?.goal | 0;
             const milestone5Goal = milestonesDoc.data().milestone5?.goal | 0;
 
@@ -312,23 +283,22 @@ async function quests(interaction, weekToDisplay, selectMenu) {
                 console.log(key);
                 let xCoordinates = Math.round((((doc.data().mission1 / document.data().quest1.goal * 100) - 10) / 100) * 873);
 
-                const mission1 = doc.data().mission1 | 0;
-                const mission2 = doc.data().mission2 | 0;
-                const mission3 = doc.data().mission3 | 0;
-                const mission4 = doc.data().mission4 | 0;
-                const mission5 = doc.data().mission5 | 0;
+                const mission1 = doc.data().mission1 || 0;
+                const mission2 = doc.data().mission2 || 0;
+                const mission3 = doc.data().mission3 || 0;
+                const mission4 = doc.data().mission4 || 0;
+                const mission5 = doc.data().mission5 || 0;
 
-                const quest1Goal = document.data().quest1?.goal | 0;
-                const quest2Goal = document.data().quest2?.goal | 0;
-                const quest3Goal = document.data().quest3?.goal | 0;
-                const quest4Goal = document.data().quest4?.goal | 0;
-                const quest5Goal = document.data().quest5?.goal | 0;
+                const quest1Goal = document.data().quest1?.goal || 0;
+                const quest2Goal = document.data().quest2?.goal || 0;
+                const quest3Goal = document.data().quest3?.goal || 0;
+                const quest4Goal = document.data().quest4?.goal || 0;
+                const quest5Goal = document.data().quest5?.goal || 0;
                 console.log(key.charAt(7));
 
 
                 switch (key) {
                     case 'mission1':
-                        console.log('hewo');
                         ctx.fillStyle = '#000000';
                         ctx.font = '50px "Burbank Big"';
                         ctx.fillText(`${mission1}/${quest1Goal}`, 1200, (sizeOf('./questUI1.png').height - 1086));
@@ -368,10 +338,25 @@ async function quests(interaction, weekToDisplay, selectMenu) {
                         break;
 
                     case 'mission3':
+                        ctx.fillStyle = '#000000';
+                        ctx.font = '50px "Burbank Big"';
+                        ctx.fillText(`${mission3}/${quest3Goal}`, 1200, (sizeOf('./questUI1.png').height - 640));
+                        ctx.font = '40px "Burbank Big"';
+                        ctx.fillStyle = (mission3 == quest3Goal) ? '#10CD19' : '#3284EC';
+                        ctx.fillRect(279, (sizeOf('./questUI1.png').height - 671), Math.round(((doc.data().mission3 / quest3Goal * 100) / 100) * 900), 35);
+                        ctx.fillStyle = '#ffffff';
+                        xCoordinates += 289;
+                        if (xCoordinates <= 288) {
+                            xCoordinates = 288;
+                        }
+
+                        if (xCoordinates >= 1070) {
+                            xCoordinates = 1070;
+                        }
+                        ctx.fillText(`${Math.round((mission3 / quest3Goal) * 100)}%`, xCoordinates, (sizeOf('./questUI1.png').height - 640));
                         break;
 
                     case 'mission4':
-                        console.log('4misshewobruh!');
                         ctx.fillStyle = '#000000';
                         ctx.font = '50px "Burbank Big"';
                         ctx.fillText(`${mission4}/${quest4Goal}`, 1200, (sizeOf('./questUI1.png').height - 400));
@@ -438,7 +423,7 @@ async function quests(interaction, weekToDisplay, selectMenu) {
     // Quest 3 ctx.fillText('90/200', 1200, (sizeOf('./questUI1.png').height - 640));
 
     // Quest2 ctx.fillRect(279, (sizeOf('./questUI1.png').height - 894), Math.round(((15 / 200 * 100) / 100) * 873), 35);
-    // Quest 3ctx.fillRect(279, (sizeOf('./questUI1.png').height - 671), Math.round(((90 / 200 * 100) / 100) * 900), 35);
+    // Quest 3 ctx.fillRect(279, (sizeOf('./questUI1.png').height - 671), Math.round(((90 / 200 * 100) / 100) * 900), 35);
 
 }
 

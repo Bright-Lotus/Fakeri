@@ -6,6 +6,7 @@ const http = require('http');
 const dotenv = require('dotenv');
 dotenv.config();
 
+// This is for railway server
 fs.readFile('./page.html', function(err, html) {
 
 	if (err) console.error(err);
@@ -22,6 +23,19 @@ const token = (process.argv[2] != 'test') ? process.env.DISCORD_TOKEN : process.
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers], partials: [Partials.Message, Partials.Channel, Partials.Reaction] });
+
+client.on('unhandledRejection', async (err) => {
+	console.error('Unhandled Promise Rejection:\n', err);
+});
+client.on('uncaughtException', async (err) => {
+	console.error('Uncaught Promise Exception:\n', err);
+});
+client.on('uncaughtExceptionMonitor', async (err) => {
+	console.error('Uncaught Promise Exception (Monitor):\n', err);
+});
+client.on('multipleResolves', async (type, promise, reason) => {
+	console.error('Multiple Resolves:\n', type, promise, reason);
+});
 
 client.commands = new Collection();
 const commandsPath = path.join(__dirname, 'commands');
