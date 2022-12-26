@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm ci && node .",
+    "start": "npm ci && node . --omit-dev=true",
     "starttest": "nodemon . test"
   },
   "keywords": [],
