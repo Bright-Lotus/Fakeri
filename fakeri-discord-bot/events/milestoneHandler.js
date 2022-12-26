@@ -1,6 +1,6 @@
 const { getFirestore, doc, setDoc, getDocs, collection, updateDoc } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
-const { firebaseConfig } = require('../main.js');
+const { firebaseConfig } = require('../firebaseConfig.js');
 const { EmbedBuilder } = require('discord.js');
 
 const app = initializeApp(firebaseConfig);
@@ -23,7 +23,6 @@ module.exports = {
                 });
         }
         else {
-            console.log(message);
             const querySnapshot = await getDocs(collection(db, `/${message.author.id}/EventQuestProgression/Milestones`));
             querySnapshot.forEach(async milestones => {
                 for (let i = 1; i < 6; i++) {
@@ -34,8 +33,6 @@ module.exports = {
                     const milestoneGoal = milestones.data()[`milestone${i}`].goal;
                     const targetCount = [];
 
-
-                    console.log(milestone, milestoneGoal, 'bjudbgfajsdgag!!! aqui!!');
                     switch (milestone?.type) {
                         case 1:
 
@@ -129,9 +126,7 @@ module.exports = {
                             break;
 
                         case 5:
-                            console.log((message.content.toLowerCase() == milestone.targetContent[0].toLowerCase()), 'hewooooo');
                             if (message.content.toLowerCase() == milestone.targetContent[0].toLowerCase()) {
-                                console.log('valid');
                                 for (const key of milestone.targetContent) {
                                     targetCount.push(key);
                                 }
@@ -186,7 +181,6 @@ module.exports = {
                                             }
                                             await updateDoc(doc(db, `${message.author.id}/EventQuestProgression/Milestones/Milestones`), { [`milestone${i}.current`]: (current + 1) }, { merge: true });
                                         }
-                                        console.log(allEqual(targetCount), 'milestone progresss');
                                     });
                                 }
                             }
@@ -196,7 +190,6 @@ module.exports = {
                             break;
 
                         default:
-                            console.log('no entry');
                             break;
                     }
                 }

@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, userMention } = require('discord.js');
-const { firebaseConfig } = require('../main.js');
+const { firebaseConfig } = require('../firebaseConfig.js');
 
 const { getFirestore, doc, getDoc, setDoc, updateDoc } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
@@ -478,7 +478,7 @@ async function duelGameFlow(thread, interaction) {
             await mp4toframe('C:/Users/djblu/BattleBot/tenorgif.mp4', './').then(async () => {
                 await ReadText('./tn.png').then(async (text) => {
                     console.log(text);
-                    if (text.toLowerCase().includes('hello chat') == false && text.toLowerCase().includes('goodbye chat') == false) {
+                    if (!text.toLowerCase().includes('hello chat') && !text.toLowerCase().includes('goodbye chat')) {
                         const dimensions = sizeOf('./tn.png');
                         const chunkSize = dimensions.height / 2;
 

@@ -1,6 +1,6 @@
 const { getFirestore, doc, setDoc, getDocs, collection } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
-const { firebaseConfig } = require('../main.js');
+const { firebaseConfig } = require('../firebaseConfig.js');
 const { EmbedBuilder } = require('discord.js');
 
 const app = initializeApp(firebaseConfig);
@@ -31,6 +31,10 @@ module.exports = {
 
         const weeklyQuestsSnap = await getDocs(collection(db, '/Event'));
         weeklyQuestsSnap.forEach(async (docSnap) => {
+            if (!docSnap.id.includes('QuestsWeek')) return;
+            const week = docSnap.id.substring(6);
+
+            if (!docSnap.data()?.quest1) return;
             for (let i = 1; i < 6; i++) {
                 console.log(docSnap.data()[`quest${i}`], i);
 
@@ -46,17 +50,19 @@ module.exports = {
                 const message = reaction.message;
                 if (mission?.type == 2) {
                     querySnapshot.forEach(async (document) => {
+                        if (document.id == 'Milestones' || document.id != week) return;
                         let current = document.data()[`mission${i}`];
                         if (!current) { current = 0; }
                         const missionGoal = docSnap.data()[`quest${i}`].goal;
                         const quest = docSnap.data()[`quest${i}`];
 
                         if (current >= missionGoal) {
-                            await setDoc(doc(db, `${message.author.id}/EventQuestProgression/Weekly/Week1`), { [`mission${quest.position}`]: (missionGoal) }, { merge: true });
+                            await setDoc(doc(db, `${message.author.id}/EventQuestProgression/Weekly/${week}`), { [`mission${quest.position}`]: (missionGoal) }, { merge: true });
                             return;
                         }
-
-                        if (reaction.message.channelId != quest.targetChannel) {
+                        const targetChannels = quest?.targetChannel?.split('|') || [ reaction.message.channelId ];
+                        console.log(targetChannels, 'debug');
+                        if (!targetChannels.some((channel) => reaction.message.channelId == channel)) {
                             return;
                         }
 
@@ -65,7 +71,7 @@ module.exports = {
                         }
 
                         if ((current + 1) >= missionGoal) {
-                            reaction.message.client.emit('questCompleted', mission, message);
+                            reaction.message.client.emit('questCompleted', mission, message.author, week);
                             message.author.send('You have completed a quest!');
                         }
 
@@ -93,7 +99,7 @@ module.exports = {
 
                             message.author.send({ embeds: [progressEmbed] });
                         }
-                        await setDoc(doc(db, `${message.author.id}/EventQuestProgression/Weekly/Week1`), { [`mission${quest.position}`]: (current + 1) }, { merge: true });
+                        await setDoc(doc(db, `${message.author.id}/EventQuestProgression/Weekly/${week}`), { [`mission${quest.position}`]: (current + 1) }, { merge: true });
                     });
                 }
 

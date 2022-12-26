@@ -1,3 +1,5 @@
+// Command Ids for the bot
+// To be used in a commandMention function
 const CommandIds = Object.freeze({
 	Register: '1038099649455726674',
 	Config: '1040968065870999654',

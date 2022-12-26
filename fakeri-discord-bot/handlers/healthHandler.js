@@ -1,13 +1,14 @@
-const { getFirestore, doc, getDoc, updateDoc, increment, setDoc } = require('firebase/firestore');
+const { getFirestore, doc, getDoc, updateDoc, setDoc } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
-const { firebaseConfig } = require('../main.js');
+const { firebaseConfig } = require('../firebaseConfig.js');
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-async function healthManager(action, user, amount, options) {
+// eslint-disable-next-line no-unused-vars
+async function healthManager(action, user, amount, __options) {
     // eslint-disable-next-line no-async-promise-executor
-    return new Promise(async (resolve, reject) => {
+    return new Promise(async (resolve) => {
         if (action == 'damage') {
             const playerInfo = await getDoc(doc(db, user.id, 'PlayerInfo'));
             if (playerInfo.exists()) {
@@ -17,7 +18,7 @@ async function healthManager(action, user, amount, options) {
                     await updateDoc(doc(db, user.id, 'PlayerInfo'), {
                         ['dead']: true,
                     }, { merge: true });
-                    await setDoc(doc(db, user.id, '/ActiveBattles'), { ['battles']: [] }, { merge: true });
+                    await setDoc(doc(db, user.id, '/ActiveBattles'), { ['battles']: { amount: 0 } });
 
                     await updateDoc(doc(db, user.id, 'PlayerInfo'), {
                         ['stats.hp']: 0,

@@ -1,8 +1,13 @@
+@font-face {
+  font-family: 'Burbank Big';
+  src: local('Burbank Big'), url(./BurbankBigCondensed-Black.otf) format('opentype');
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  font-family: 'Burbank Big Condensed'
     sans-serif;
+  
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
