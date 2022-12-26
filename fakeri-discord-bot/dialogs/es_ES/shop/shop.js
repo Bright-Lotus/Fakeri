@@ -1,7 +1,9 @@
+const { Colors } = require('../../../emums/colors');
+
 module.exports = {
     dialog: {
         name: 'shopCmd',
-        embedColor: '#C600FF',
+        embedColor: Colors.NoraColor,
         step1: {
             name: 'Nora',
             message: 'Hola **{displayName}**, espero vengas a comprar algo.',

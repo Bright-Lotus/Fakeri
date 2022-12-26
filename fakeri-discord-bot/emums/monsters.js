@@ -363,11 +363,15 @@ const Monsters = [
         },
         Forctia: {
             id: 19,
-            keywords: [],
-            abilities: {
-                type: 'tough',
-                ratio: 40,
-            },
+            keywords: [
+                {
+                    displayName: 'Hardened',
+                    type: 'Hardened',
+                    subtype: 'hardened',
+                    // Intensity of keyword or ability, for example, 50 means splits with 50% stats of the original
+                    ratio: 100,
+                },
+            ],
             minLvl: 40,
             // XP the monster gives when killed
             baseXp: 250,
@@ -491,9 +495,10 @@ const Monsters = [
             id: 24,
             keywords: [],
             abilities: {
-                type: 'strike',
+                type: 'ability',
                 subtype: 'plasmaStrike',
                 ratio: 60,
+                displayName: 'Plasma Strike',
             },
             minLvl: 55,
             // XP the monster gives when killed
@@ -511,9 +516,10 @@ const Monsters = [
             id: 25,
             keywords: [],
             abilities: {
-                type: 'strike',
+                type: 'ability',
                 subtype: 'thunderStrike',
                 ratio: 80,
+                displayName: 'Thunder Strike',
             },
             minLvl: 57,
             // XP the monster gives when killed
@@ -599,9 +605,10 @@ const Monsters = [
             id: 29,
             keywords: [],
             abilities: {
-                type: 'strike',
+                type: 'ability',
                 subtype: 'vampiricStrike',
                 ratio: 60,
+                displayName: 'Vampiric Strike',
             },
             minLvl: 70,
             // XP the monster gives when killed
@@ -639,9 +646,10 @@ const Monsters = [
             id: 31,
             keywords: [],
             abilities: {
-                type: 'strike',
+                type: 'ability',
                 subtype: 'lavaStrike',
                 ratio: 80,
+                displayName: 'Lava Strike',
             },
             minLvl: 75,
             // XP the monster gives when killed

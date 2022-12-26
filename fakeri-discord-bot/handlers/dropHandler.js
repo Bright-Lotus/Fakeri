@@ -69,7 +69,7 @@ async function giftsDrop(client) {
     const timeoutArray = [];
     const channels = await getDoc(doc(db, 'Event/GiftDrops'));
     const msgs = [];
-    const giftColors = ['Blue', 'Green', 'Red', 'Pink', 'Purple', 'Yellow'];
+    const giftColors = ['Blue', 'Green', 'Red', 'Pink', 'Ourple', 'Yellow'];
     const randomItem = giftColors[Math.floor(Math.random() * giftColors.length)];
     if (channels.exists()) {
         Object.entries(channels.data()).forEach(async channel => {
@@ -136,8 +136,8 @@ async function giftsDrop(client) {
                 const timeout3 = setTimeout((dropsChannel) => {
 
                     const giftEmbed = new EmbedBuilder()
-                        .setTitle('A gift has fallen from the portal! 🎁')
-                        .setDescription('React with 🫳 to open it!\nWe have to reach 10 helpers!')
+                        .setTitle('Un regalo ha caido del portal! 🎁')
+                        .setDescription('Necesitamos 20 personas que ayuden a abrirlo! 🫳')
                         .setColor(Colors[randomItem]);
                     console.log('Thy event is now');
                     dropsChannel.sendTyping();
@@ -157,7 +157,7 @@ async function giftsDrop(client) {
                             await updateDoc(doc(db, 'Event/GiftDrops'), {
                                 ['activeDrop']: {
                                     progress: 0,
-                                    goal: 2,
+                                    goal: 20,
                                     totalEnd: Timestamp.fromDate(endTime),
                                     giftTimeout: Timestamp.fromDate(giftEnd),
                                     messages: msgs,
@@ -198,7 +198,7 @@ async function giftsDrop(client) {
                                 .setDescription('Ya no es posible reclamar recompensas')
                                 .setColor('#DE00FF');
 
-                            giftChannel.send({ embeds: [destructionEmbed], files: [new AttachmentBuilder(destructionVideoFilePath, { name: `gift_destruction_${randomItem.toLowerCase()}.mp4` })] });
+                            giftChannel.send({ embeds: [destructionEmbed] /*files: [new AttachmentBuilder(destructionVideoFilePath, { name: `gift_destruction_${randomItem.toLowerCase()}.mp4` })]*/ });
                             await updateDoc(doc(db, 'Event/GiftDrops'), {
                                 ['activeDrop.destroyed']: true,
                             }, { merge: true });

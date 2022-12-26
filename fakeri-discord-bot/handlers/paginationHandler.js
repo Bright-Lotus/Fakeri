@@ -1,6 +1,7 @@
 const { EmbedBuilder, ActionRowBuilder, SelectMenuBuilder, bold, formatEmoji, ButtonBuilder, ButtonStyle, chatInputApplicationCommandMention } = require('discord.js');
 const { CommandIds } = require('../emums/commandIds');
 const { Icons } = require('../emums/icons');
+const { Utils } = require('../utils');
 
 async function pagination(category, objects, page, user, args) {
     return new Promise((resolve) => {
@@ -61,10 +62,13 @@ async function pagination(category, objects, page, user, args) {
         );
 
         let maxPages;
-        const maxItemsInPage = (category != 'leaderboard') ? 3 : 5;
+        let maxItemsInPage = (category != 'leaderboard') ? 3 : 5;
+        if (category == 'allyTarget') {
+            maxItemsInPage = 10;
+        }
         let itemsProcessed = 1;
         let currentItem = 0;
-        if (category != 'leaderboard') {
+        if (!args?.arraySorted) {
             objects.sort((a, b) => {
                 return (a.id - b.id);
             });
@@ -87,8 +91,6 @@ async function pagination(category, objects, page, user, args) {
                     embed.setDescription(`Equipando en ranura ${args.orbPosition}`);
                     selectMenu.setCustomId(`inventoryAbilityOrbsModal-orb${args.orbPosition}-selectMenu/${user.id}`).setPlaceholder(`Equipar orbe en ranura ${args.orbPosition}...`);
 
-                    // eslint-disable-next-line no-unused-vars
-
 
                     console.log(currentItem, itemsProcessed, maxItemsInPage, 'sadfasd');
                     if (itemsProcessed > maxItemsInPage) {
@@ -99,7 +101,7 @@ async function pagination(category, objects, page, user, args) {
                     embed.addFields(
                         {
                             name: `__${element.name}__ | ID: ${element.id}`,
-                            value: element.desc + `\n\n${bold('Mana requerido:')} ${element.requiredMana} ${formatEmoji(Icons.Mana)}`,
+                            value: `${Utils.FormatDescription(element.desc, element)}` + `\n\n${bold('Mana requerido:')} ${element.requiredMana} ${formatEmoji(Icons.Mana)}`,
                         },
                     );
 
@@ -118,7 +120,6 @@ async function pagination(category, objects, page, user, args) {
                 }
                 case 'abilityOrbsInventoryEnchanter': {
                     embed.setTitle(`Tus Orbes de Habilidad ${Icons.AbilityOrb}`).setColor('Aqua');
-                    // eslint-disable-next-line no-unused-vars
 
 
                     console.log(currentItem, itemsProcessed, maxItemsInPage, 'sadfasd');
@@ -129,8 +130,8 @@ async function pagination(category, objects, page, user, args) {
                     if (!element) continue;
                     embed.addFields(
                         {
-                            name: `__${element.name}__ | ID: ${element.id}`,
-                            value: element.desc + `\n\n${bold('Mana requerido:')} ${element.requiredMana} ${formatEmoji(Icons.Mana)}`,
+                            name: `${element.name} | ID: ${element.id}`,
+                            value: `${Utils.FormatDescription(element.desc, element)}` + `\n\n${bold('Mana requerido:')} ${element.requiredMana} ${formatEmoji(Icons.Mana)}`,
                         },
                     );
 
@@ -141,13 +142,8 @@ async function pagination(category, objects, page, user, args) {
                 }
                 case 'abilityOrbsInventory': {
                     embed.setTitle(`Tus Orbes de Habilidad ${Icons.AbilityOrb}`).setColor('Aqua');
-                    if (args.class == 'warrior') {
-                        selectMenu.setCustomId(`inventoryAbilityOrbsModal-orb1-selectMenu/${user.id}`).setPlaceholder('Equipar ranura de habilidad 1...');
-                        selectMenuOrb2.setCustomId(`inventoryAbilityOrbsModal-orb2-selectMenu/${user.id}`).setPlaceholder('Equipar ranura de habilidad 2...');
-
-                    }
-                    // eslint-disable-next-line no-unused-vars
-
+                    selectMenu.setCustomId(`inventoryAbilityOrbsModal-orb1-selectMenu/${user.id}`).setPlaceholder('Equipar ranura de habilidad 1...');
+                    selectMenuOrb2.setCustomId(`inventoryAbilityOrbsModal-orb2-selectMenu/${user.id}`).setPlaceholder('Equipar ranura de habilidad 2...');
 
                     console.log(currentItem, itemsProcessed, maxItemsInPage, 'sadfasd');
                     if (itemsProcessed > maxItemsInPage) {
@@ -158,7 +154,7 @@ async function pagination(category, objects, page, user, args) {
                     embed.addFields(
                         {
                             name: `__${element.name}__ | ID: ${element.id}`,
-                            value: element.desc + `\n\n${bold('Mana requerido:')} ${element.requiredMana} ${formatEmoji(Icons.Mana)}`,
+                            value: `${Utils.FormatDescription(element.desc, element)}` + `\n\n${bold('Mana requerido:')} ${element.requiredMana} ${formatEmoji(Icons.Mana)}`,
                         },
                     );
 
@@ -185,11 +181,9 @@ async function pagination(category, objects, page, user, args) {
                     console.log(currentItem, 'log0001');
                     break;
                 }
-                case 'swordsInventory':
+                case 'swordsInventory': {
                     embed.setTitle('Your Swords').setColor('#F83636');
                     selectMenu.setCustomId(`inventorySwordsModal-selectMenu/${user.id}`).setPlaceholder('Cambiar espada equipada...');
-                    // eslint-disable-next-line no-unused-vars
-
 
                     console.log(currentItem, itemsProcessed, maxItemsInPage, 'sadfasd');
                     if (itemsProcessed > maxItemsInPage) {
@@ -197,11 +191,16 @@ async function pagination(category, objects, page, user, args) {
                     }
 
                     if (!element) continue;
-
+                    let perksStr = `\n\n***${element?.perks?.perkName || 'Ninguno'}***\n${element?.perks?.perkDesc || 'Este objeto no tiene ningun perk'}\n\n`;
+                    for (let index = 0; index < Object.values(element?.perks || []).length; index++) {
+                        const perk = element?.perks[`perk${index + 1}`];
+                        if (index == 0) { perksStr = `\n\n**${perk?.perkName}**\n${perk?.perkDesc}\n\n`; }
+                        else { perksStr += `\n\n**${perk?.perkName}`; }
+                    }
                     embed.addFields(
                         {
                             name: '__' + element.name + '__',
-                            value: `\n\n\n***Stats***\n\n**+${element.stats.atk}** - ATK\n**+${element.stats.spd}** - SPD\n\n**Perks**\n\n***${element.perks.perkName || 'Ninguna'}***\n${element.perks.perkDesc || 'Este objeto no tiene perks'}\n\n**Minimum Level:** ${element.minLvl}`,
+                            value: `\n\n\n***Stats***\n\n**+${element.stats.atk}** - ATK\n**+${element.stats.spd}** - SPD\n\n**Perks**${perksStr}**Minimum Level:** ${element.minLvl}`,
                             inline: true,
                         },
                     );
@@ -219,11 +218,91 @@ async function pagination(category, objects, page, user, args) {
                     currentItem += 1;
                     console.log(currentItem, 'log0001');
                     break;
+                }
+                case 'armorPlatesInventory': {
+                    embed.setTitle('Tus Armaduras').setColor('#F83636');
+                    selectMenu.setCustomId(`inventoryArmorPlatesModal-selectMenu/${user.id}`).setPlaceholder('Cambiar armadura equipada...');
+
+                    console.log(currentItem, itemsProcessed, maxItemsInPage, 'sadfasd');
+                    if (itemsProcessed > maxItemsInPage) {
+                        continue;
+                    }
+
+                    if (!element) continue;
+                    let perksStr = `\n\n***${element?.perks?.perkName || 'Ninguno'}***\n${element?.perks?.perkDesc || 'Este objeto no tiene ningun perk'}\n\n`;
+                    for (let index = 0; index < Object.values(element?.perks || []).length; index++) {
+                        const perk = element?.perks[`perk${index + 1}`];
+                        if (index == 0) { perksStr = `\n\n**${perk?.perkName}**\n${perk?.perkDesc}\n\n`; }
+                        else { perksStr += `\n\n**${perk?.perkName}`; }
+                    }
+
+                    embed.addFields(
+                        {
+                            name: '__' + element.name + '__',
+                            value: `\n\n\n***Stats***\n\n**+${element.stats.armor}** - Armor\n**+${element.stats.magicDurability}** - Magic DURABILITY\n\n**Perks**${perksStr}**Minimum Level:** ${element.minLvl}`,
+                            inline: true,
+                        },
+                    );
+
+                    selectMenu.addOptions(
+                        {
+                            label: element.name,
+                            description: `Nivel minimo: ${element.minLvl}`,
+                            value: `inventoryArmorPlateModal-armorPlate-equip-${element.id}`,
+                            emoji: '🛡️',
+                        },
+                    );
+
+                    itemsProcessed += 1;
+                    currentItem += 1;
+                    console.log(currentItem, 'log0001');
+                    break;
+                }
+
+                case 'bowsInventory': {
+                    embed.setTitle('Your Bows').setColor('Green');
+                    selectMenu.setCustomId(`inventoryBowsModal-selectMenu/${user.id}`).setPlaceholder('Cambiar arco equipado...');
+
+                    console.log(currentItem, itemsProcessed, maxItemsInPage, 'sadfasd');
+                    if (itemsProcessed > maxItemsInPage) {
+                        continue;
+                    }
+
+                    if (!element) continue;
+
+                    let perksStr = '\n\n***Ninguno***\nEste objeto no tiene ningun perk\n\n';
+                    for (let index = 0; index < Object.values(element?.perks).length; index++) {
+                        const perk = element?.perks[`perk${index + 1}`];
+                        if (index == 0) { perksStr = `\n\n**${perk.perkName}**\n${perk.perkDesc}\n\n`; }
+                        else { perksStr += `\n\n**${perk.perkName}`; }
+                    }
+
+                    embed.addFields(
+                        {
+                            name: '__' + element.name + '__',
+                            value: `\n\n\n***Stats***\n\n**+${element.stats.atk}** - ATK\n**+${element.stats.spd}** - SPD\n\n**Perks**${perksStr}**Minimum Level:** ${element.minLvl}`,
+                            inline: true,
+                        },
+                    );
+
+                    selectMenu.addOptions(
+                        {
+                            label: element.name,
+                            description: `Nivel minimo: ${element.minLvl}`,
+                            value: `inventoryBowModal-bow-equip-${element.id}`,
+                            emoji: '🏹',
+                        },
+                    );
+
+                    itemsProcessed += 1;
+                    currentItem += 1;
+                    console.log(currentItem, 'log0001');
+                    break;
+                }
 
                 case 'abilityOrbs':
                     embed.setTitle('Your Ability Orbs').setColor('Aqua');
                     selectMenu.setCustomId(`abilityModal-selectMenu/${user.id}`).setPlaceholder('Select ability...');
-                    // eslint-disable-next-line no-unused-vars
 
 
                     console.log(currentItem, itemsProcessed, maxItemsInPage, 'sadfasd');
@@ -238,15 +317,15 @@ async function pagination(category, objects, page, user, args) {
                     embed.addFields(
                         {
                             name: `__${element.name}__ | ID: ${element.id}`,
-                            value: element.desc + `\n\n${bold('Mana requerido:')} ${element.requiredMana} ${formatEmoji(Icons.Mana)}`,
+                            value: `${Utils.FormatDescription(element.desc, element)}` + `\n\n${bold('Mana requerido:')} ${element.requiredMana} ${formatEmoji(Icons.Mana)}`,
                         },
                     );
 
                     selectMenu.addOptions(
                         {
                             label: `${element.name}`,
-                            description: `Mana requerido: ${element.requiredMana} ${formatEmoji(Icons.Mana)}`,
-                            value: `abilityModal-ability-use-${element.id}-${args.enemyUnique}`,
+                            description: `Mana requerido: ${element.requiredMana}`,
+                            value: `abilityModal-ability-select-${element.id}-${element.target}`,
                             emoji: Icons.AbilityOrb,
                         },
                     );
@@ -260,7 +339,6 @@ async function pagination(category, objects, page, user, args) {
                 case 'wandsInventoryEnchanter':
                     embed.setTitle('Your Magical Wands').setColor('Blue');
                     selectMenu.setCustomId(`inventoryWandsModal-selectMenu/${user.id}`).setPlaceholder('Cambiar varita equipada...');
-                    // eslint-disable-next-line no-unused-vars
 
 
                     console.log(currentItem, itemsProcessed, maxItemsInPage, 'sadfasd');
@@ -308,6 +386,60 @@ async function pagination(category, objects, page, user, args) {
                     itemsProcessed += 1;
                     currentItem += 1;
                     break;
+
+                case 'allyTarget': {
+                    embed.setTitle('Aliados').setColor('Green');
+                    selectMenu.setCustomId(`allyTarget-selectMenu/${user.id}`).setPlaceholder('Seleccionar aliado...');
+                    if (!element) continue;
+
+
+                    embed.addFields(
+                        {
+                            name: `(+) ${bold(element.name)}`,
+                            value: `HP ${element.playerHp}/${bold(element.playerMaxHp)} ${Utils.HpEmoji(element.playerHp, element.playerMaxHp)}`,
+                        },
+                    );
+
+                    selectMenu.addOptions(
+                        {
+                            label: element.name,
+                            description: `HP ${element.playerHp}/${element.playerMaxHp} ${Utils.HpEmoji(element.playerHp, element.playerMaxHp)}`,
+                            value: `ability-target-ally-${element.id}-${element.abilityID}`,
+                            emoji: '🪄',
+                        },
+                    );
+
+                    itemsProcessed += 1;
+                    currentItem += 1;
+                    break;
+                }
+
+                case 'consumables': {
+                    embed.setTitle('Consumibles').setColor('Green');
+                    selectMenu.setCustomId(`consumable-selectMenu/${user.id}`).setPlaceholder('Seleccionar consumible...');
+                    if (!element) continue;
+
+
+                    embed.addFields(
+                        {
+                            name: `${bold(element.name)}`,
+                            value: `${bold(element.type.toUpperCase())}\n(+) ${element.amount}\n\n**Cantidad:** ${element.consumableAmount}`,
+                        },
+                    );
+
+                    selectMenu.addOptions(
+                        {
+                            label: element.name,
+                            description: `${element.type.toUpperCase()} | ${element.amount}`,
+                            value: `consumable-use-${element.id}`,
+                            emoji: '🥤',
+                        },
+                    );
+
+                    itemsProcessed += 1;
+                    currentItem += 1;
+                    break;
+                }
 
                 default:
                     break;

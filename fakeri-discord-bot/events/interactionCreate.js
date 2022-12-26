@@ -1,11 +1,11 @@
-const { Events } = require('discord.js');
+const { Events, EmbedBuilder, userMention, time, TimestampStyles, codeBlock } = require('discord.js');
 const { ErrorEmbed, EventErrors } = require('../errors/errors.js');
 const { getFirestore, doc, getDoc } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
 const { firebaseConfig } = require('../firebaseConfig.js');
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
+const chalk = require('chalk');
 
 module.exports = {
     name: Events.InteractionCreate,
@@ -16,7 +16,7 @@ module.exports = {
 
         if (!command) return;
         const player = await getDoc(doc(db, interaction.user.id, 'PlayerInfo'));
-        if (!player.exists() && interaction.commandName != 'register') {
+        if (!player.exists() && interaction.commandName != 'register' && interaction.commandName != 'config' && interaction.commandName != 'adjust') {
             return interaction.reply({ embeds: [ErrorEmbed(EventErrors.PlayerNotRegistered)] });
         }
         if (player.exists()) {
@@ -31,12 +31,28 @@ module.exports = {
         catch (error) {
             console.error(error);
             if (interaction?.deferred || interaction?.replied) {
-                await interaction.editReply({ content: 'There was an error while executing this command!', ephemeral: true });
+                const errorEmbed = new EmbedBuilder()
+                    .setColor('Red')
+                    .setTitle('Algo inesperado ha sucedido!')
+                    .setDescription(`Si el error continua por favor contacta a ${userMention('1011657604822474873')}`);
+                await interaction.editReply({ embeds: [errorEmbed], ephemeral: true });
             }
             else {
+                const errorEmbed = new EmbedBuilder()
+                    .setColor('Red')
+                    .setTitle('Algo inesperado ha sucedido!')
+                    .setDescription(`Si el error continua por favor contacta a ${userMention('1011657604822474873')}`);
+                await interaction.editReply({ embeds: [errorEmbed], ephemeral: true });
                 await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
             }
+            const errorChannelEmbed = new EmbedBuilder().setColor('Red')
+                .setTimestamp(new Date())
+                .setTitle('Un error ha ocurrido!')
+                .setDescription(`El siguiente error ha sucedido ${time(new Date(), TimestampStyles.RelativeTime)} ${time(new Date(), TimestampStyles.LongDateTime)}\n${codeBlock(error)}`);
+            interaction.client.channels.fetch('1054804493201571912').then(channel => {
+                channel.send({ embeds: [errorChannelEmbed] });
+            });
         }
-        console.log(`${interaction.user.tag} in #${interaction.channel.name} triggered an interaction.`);
+        console.log(chalk.cyan(`${interaction.user.tag} in #${interaction.channel.name} triggered an interaction.`));
     },
 };

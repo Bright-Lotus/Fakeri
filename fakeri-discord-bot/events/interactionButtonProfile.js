@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, bold } = require('discord.js');
 
 module.exports = {
     name: 'interactionCreate',
@@ -9,7 +9,7 @@ module.exports = {
             const goldEmbed = new EmbedBuilder()
                 .setTitle('Oro')
                 .setColor('Yellow')
-                .setDescription(`Oro actual: ${new Intl.NumberFormat().format(gold)}`);
+                .setDescription(`Oro actual: ${bold(new Intl.NumberFormat().format(gold))} 🪙`);
             interaction.reply({ embeds: [goldEmbed] });
         }
         if (interaction.customId.includes('eventPointsBtn')) {
@@ -18,7 +18,7 @@ module.exports = {
                 .setTitle('Puntos del evento!')
                 .setColor('Yellow')
                 .setFooter({ text: 'Recuerda que tus puntos del evento son la cantidad total de XP acumulada!' })
-                .setDescription(`Puntos actuales: ${new Intl.NumberFormat().format(eventPts)}`);
+                .setDescription(`Puntos actuales: ${bold(new Intl.NumberFormat().format(eventPts))}`);
             interaction.reply({ embeds: [eventPtsEmbed] });
         }
     },

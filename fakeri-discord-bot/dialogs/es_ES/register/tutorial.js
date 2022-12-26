@@ -82,7 +82,7 @@ module.exports = {
             },
             specialFunction: {
                 name: 'continueDialogInAnotherChannel',
-                targetChannels: '1032013306631827546|1049703237336444968',
+                targetChannels: '1056670330652995594|1056699289570656256',
             },
         },
         step8option1: {
@@ -123,7 +123,7 @@ module.exports = {
             },
             specialFunction: {
                 name: 'setActiveDialog',
-                target: 'Nora/testDialog',
+                target: 'Nora/default',
             },
         },
         step10option1: {

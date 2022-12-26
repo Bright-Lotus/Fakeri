@@ -2,6 +2,7 @@ const { getFirestore, doc, updateDoc, increment, getDoc } = require('firebase/fi
 const { initializeApp } = require('firebase/app');
 const { firebaseConfig } = require('../firebaseConfig.js');
 const { ErrorEmbed, EventErrors } = require('../errors/errors.js');
+const { Icons } = require('../emums/icons.js');
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -21,19 +22,18 @@ async function goldManager(action, amount, user) {
         }
         else if (action == 'buy') {
             console.log('waiting');
-            await getDoc(doc(db, user.id, 'PlayerInfo')).then(async docSnap => {
-                if (docSnap.exists()) {
-                    const playerGold = docSnap.data().gold;
-                    if (amount > playerGold) {
-                        const embed = ErrorEmbed(EventErrors.NotEnoughGold, `Oro que tienes: ${playerGold}\nOro que necesitas: ${amount}`);
-                        return reject({ errorEmbed: embed, errorCode: EventErrors.NotEnoughGold });
-                    }
-                    await updateDoc(doc(db, user.id, 'PlayerInfo'), {
-                        ['gold']: increment(-Math.abs(amount)),
-                    }, { merge: true });
-                    return resolve(playerGold - amount);
+            const playerInfo = await getDoc(doc(db, user.id, 'PlayerInfo'));
+            if (playerInfo.exists()) {
+                const playerGold = playerInfo.data().gold;
+                if (amount > playerGold) {
+                    const embed = ErrorEmbed(EventErrors.NotEnoughGold, `Oro que tienes: ${playerGold} ${Icons.Gold}\nOro que necesitas: ${amount} ${Icons.Gold}`);
+                    return reject({ errorEmbed: embed, errorCode: EventErrors.NotEnoughGold });
                 }
-            });
+                await updateDoc(doc(db, user.id, 'PlayerInfo'), {
+                    ['gold']: increment(-Math.abs(amount)),
+                }, { merge: true });
+                return resolve(playerGold - amount);
+            }
         }
     });
 }

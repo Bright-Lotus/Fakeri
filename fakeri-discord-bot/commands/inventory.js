@@ -60,7 +60,12 @@ async function inventory(interaction, category, args) {
             }
             const itemsArray = Object.values(items).filter(element => (typeof element != 'number'));
             const itemRow = new ActionRowBuilder();
-            const categories = ['abilityOrbs', classSignatureWeapon, 'armorPlates'].filter(element => element != category);
+            // TODO: Maybe implement ability orbs for Archer and Warriors
+            let categories = [ classSignatureWeapon, 'armorPlates' ];
+            if (playerInfo.data().class == 'enchanter') {
+                categories.push('abilityOrbs');
+            }
+            categories = categories.filter(element => element != category);
             const categoriesButton = {
                 abilityOrbs: 'Orbes de Habilidad',
                 swords: 'Espadas',
@@ -110,6 +115,50 @@ async function inventory(interaction, category, args) {
                         );
                     }
                 }
+                if (category == 'bows') {
+                    if (equipped.data().bow?.id) {
+                        console.log('Algo equipado');
+                        const bow = equipment.data().bows[`bow${equipped.data().bow.id}`];
+                        itemRow.addComponents(
+                            new ButtonBuilder()
+                                .setCustomId('equippedBow-btn')
+                                .setEmoji('🏹')
+                                .setStyle(ButtonStyle.Primary)
+                                .setLabel(bow.name),
+                        );
+                    }
+                    else {
+                        itemRow.addComponents(
+                            new ButtonBuilder()
+                                .setCustomId('equippedBow-btn')
+                                .setEmoji('❎')
+                                .setStyle(ButtonStyle.Secondary)
+                                .setLabel('Nada equipado'),
+                        );
+                    }
+                }
+                if (category == 'armorPlates') {
+                    if (equipped.data().armorPlate?.id) {
+                        console.log('Algo equipado');
+                        const armorPlate = equipment.data().armorPlates[`armorPlate${equipped.data().bow.id}`];
+                        itemRow.addComponents(
+                            new ButtonBuilder()
+                                .setCustomId('equippedArmorPlate-btn')
+                                .setEmoji('🛡️')
+                                .setStyle(ButtonStyle.Primary)
+                                .setLabel(armorPlate.name),
+                        );
+                    }
+                    else {
+                        itemRow.addComponents(
+                            new ButtonBuilder()
+                                .setCustomId('equippedArmorPlate-btn')
+                                .setEmoji('❎')
+                                .setStyle(ButtonStyle.Secondary)
+                                .setLabel('Nada equipado'),
+                        );
+                    }
+                }
                 if (category == 'wands') {
                     if (equipped.data().wand?.id) {
                         console.log('Algo equipado');
@@ -133,45 +182,7 @@ async function inventory(interaction, category, args) {
                     }
                 }
                 if (category == 'abilityOrbs') {
-                    if (equipped.data().abilityOrbs?.orb1) {
-                        const abilityOrbSlot1 = equipment.data().abilityOrbs[`abilityOrb${equipped.data().abilityOrbs.orb1}`];
-                        itemRow.addComponents(
-                            new ButtonBuilder()
-                                .setCustomId(`equippedOrb1-btn-${equipped.data().abilityOrbs.orb1}`)
-                                .setEmoji(`${Icons.AbilityOrb}`)
-                                .setStyle(ButtonStyle.Primary)
-                                .setLabel(abilityOrbSlot1.name),
-                        );
-                    }
-                    else {
-                        itemRow.addComponents(
-                            new ButtonBuilder()
-                                .setCustomId('equippedOrb1-btn')
-                                .setEmoji('❎')
-                                .setStyle(ButtonStyle.Secondary)
-                                .setLabel('Nada equipado'),
-                        );
-                    }
-
-                    if (equipped.data().abilityOrbs?.orb2) {
-                        const abilityOrbSlot2 = equipment.data().abilityOrbs[`abilityOrb${equipped.data().abilityOrbs.orb2}`];
-                        itemRow.addComponents(
-                            new ButtonBuilder()
-                                .setCustomId(`equippedOrb2-btn-${equipped.data().abilityOrbs.orb2}`)
-                                .setEmoji(`${Icons.AbilityOrb}`)
-                                .setStyle(ButtonStyle.Primary)
-                                .setLabel(abilityOrbSlot2.name),
-                        );
-                    }
-                    else {
-                        itemRow.addComponents(
-                            new ButtonBuilder()
-                                .setCustomId('equippedOrb2-btn')
-                                .setEmoji('❎')
-                                .setStyle(ButtonStyle.Secondary)
-                                .setLabel('Nada equipado'),
-                        );
-                    }
+                    // TODO: Maybe implement ability orbs for Archers and Warriors
 
                     if (equipped.data().abilityOrbs?.[`orb${args?.orbPosition || -1}`]) {
                         const orbEquippedInSlot = equipment.data().abilityOrbs[`abilityOrb${equipped.data().abilityOrbs?.['orb' + args?.orbPosition || -1]}`];

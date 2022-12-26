@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, chatInputApplicationCommandMention, bold, formatEmoji, underscore, italic, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, chatInputApplicationCommandMention, bold, formatEmoji, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { CommandIds } = require('../emums/commandIds.js');
 const { Icons } = require('../emums/icons.js');
 
@@ -29,7 +29,7 @@ module.exports = {
 async function profile(interaction, args) {
     await interaction.deferReply();
     let playerID = interaction.options.getUser('jugador')?.id || interaction.user.id;
-    if (args.contextMenu) {
+    if (args?.contextMenu) {
         playerID = interaction.targetId;
     }
     const playerUser = await interaction.guild.members.fetch(playerID);
@@ -44,7 +44,18 @@ async function profile(interaction, args) {
         const profileEmbed = new EmbedBuilder()
             .setTitle(`Perfil de ${playerUser.displayName}`)
             .setThumbnail(playerUser.displayAvatarURL({ extension: 'jpg' }))
-            .setDescription(`Para ver las misiones usa ${chatInputApplicationCommandMention('event', CommandIds.Event)}`);
+            .setDescription(bold(playerInfo.data().instructor.level.titleName));
+
+        const extraData = new EmbedBuilder()
+            .setTitle('Informacion Adicional')
+            .setColor('Blurple')
+            .setDescription('_ _');
+
+        extraData.addFields(
+            { name: `Experiencia ${formatEmoji(Icons.LevelUp)}`, value: `${playerInfo.data().stats.xp} / ${bold(playerInfo.data().nextLvlXpGoal)}\n _ _` },
+            { name: 'Estrellas Instructor 🌟', value: `${playerInfo.data().instructor.level.currentStars} / ${bold(playerInfo.data().instructor.level.starsForNextTitle)}\n _ _` },
+            { name: `Nivel Jugador ${Icons.Level}`, value: `${playerInfo.data().playerLvl} / ${bold(100)}\n _ _` },
+        );
 
         const statRow = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
@@ -52,6 +63,11 @@ async function profile(interaction, args) {
                 .setLabel(`${Utils.NumberFormatWithLetter(playerInfo.data().gold)} - Oro`)
                 .setStyle(ButtonStyle.Primary)
                 .setEmoji(Icons.Gold),
+            new ButtonBuilder()
+                .setCustomId('manaBtn')
+                .setLabel(`${playerInfo.data().stats.mana} - Mana Actual`)
+                .setStyle(ButtonStyle.Primary)
+                .setEmoji(Icons.Mana),
             new ButtonBuilder()
                 .setCustomId('xpBonusBtn')
                 .setLabel(`${playerInfo.data().xpBonus}% - XP Bonus`)
@@ -85,7 +101,7 @@ async function profile(interaction, args) {
             switch (stat) {
                 case 'hp': return hpEmoji;
                 case 'atk': return Icons.ATK;
-                case 'mana': return formatEmoji(Icons.Mana);
+                case 'manaPerAttack': return formatEmoji(Icons.Mana);
                 case 'armor': return Icons.Armor;
                 case 'magicDurability': return Icons.MagicDurability;
                 case 'speed': return Icons.SPD;
@@ -98,28 +114,28 @@ async function profile(interaction, args) {
         const equipped = await getDoc(doc(db, playerID, 'PlayerInfo/Inventory/Equipped'));
         const equipment = await getDoc(doc(db, playerID, 'PlayerInfo/Inventory/Equipment'));
         for (const key in playerStats) {
-            if (key == 'maxHp' || key == 'xp') continue;
+            if (key == 'maxHp' || key == 'xp' || key == 'mana') continue;
             let baseStat;
             let itemStat;
             if (equipment.exists()) {
                 if (equipped.data().sword?.id) {
                     const stat = (key == 'speed') ? 'spd' : key;
-                    baseStat = playerStats[key] - equipment.data().swords[`sword${equipped.data().sword.id}`]?.stats[stat] || undefined;
-                    itemStat = equipment.data().swords[`sword${equipped.data().sword.id}`].stats[stat] || undefined;
+                    baseStat = playerStats[ key ] - equipment.data().swords[ `sword${equipped.data().sword.id}` ]?.stats[ stat ] || undefined;
+                    itemStat = equipment.data().swords[ `sword${equipped.data().sword.id}` ].stats[ stat ] || undefined;
                 }
             }
-            if (!baseStat) { baseStat = playerStats[key]; }
+            if (!baseStat) { baseStat = playerStats[ key ]; }
             if (!itemStat) { itemStat = 0; }
             console.log(baseStat, key, itemStat);
             profileEmbed.addFields(
                 {
-                    name: `${key.toUpperCase()}`,
-                    value: `${italic(playerStats[key])} ${(key == 'hp') ? '/ ' + bold(playerStats.maxHp) : ''} ${statEmoji(key)}\n\n` + bold(`+${baseStat}`) + ` - ${underscore('Base')}` + bold(`\n+${itemStat}`) + ` - ${underscore('Items\n\n')}`,
+                    name: `${Utils.FormatStatName(key)}`,
+                    value: `${playerStats[ key ]} ${(key == 'hp') ? '/ ' + bold(playerStats.maxHp) : ''} ${statEmoji(key)}\n\n` + bold(`+${baseStat}`) + '  | Base' + bold(`\n+${itemStat}`) + '  | Items\n\n',
                     inline: true,
                 },
             );
         }
-        interaction.editReply({ embeds: [profileEmbed], components: [statRow] });
+        interaction.editReply({ embeds: [ profileEmbed, extraData ], components: [ statRow ] });
     }
 
 }

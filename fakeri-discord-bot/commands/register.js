@@ -13,7 +13,7 @@ async function register(interaction) {
     const row = new ActionRowBuilder()
         .addComponents(
             new SelectMenuBuilder()
-                .setCustomId('class-select')
+                .setCustomId(`class-select/${interaction.user.id}`)
                 .setPlaceholder('Choose your class')
                 .addOptions(
                     {
@@ -38,7 +38,7 @@ async function register(interaction) {
     const classEmbed = new EmbedBuilder()
         .setTitle('Let\'s find your destined path!')
         .setDescription('Warrior | Archer | Enchanter')
-        .setFooter({ text: 'Mana is the same for Warrior and Archer', iconURL: 'https://art.pixilart.com/bc43f3f21769f5f.png' })
+        .setFooter({ text: 'Mana PER ATTACK is the same for Warrior and Archer', iconURL: 'https://cdn.discordapp.com/emojis/1048224179507433572.png?v=1' })
         .setColor('#ffffff');
 
     const warriorEmbed = new EmbedBuilder()
@@ -48,12 +48,12 @@ async function register(interaction) {
 
     const archerEmbed = new EmbedBuilder()
         .setTitle('Archer 🏹')
-        .setDescription('**Stats:**\nRegular base ATK\nLess base HP\nMore base Speed\nCan attack from different channels\n\n**Good for range**')
+        .setDescription('**Stats:**\nRegular base ATK\nLess base HP\nMore base Speed\nCan access farm channels five levels above\n\n**Good for range**')
         .setColor('#37BC6C');
 
     const enchanterEmbed = new EmbedBuilder()
         .setTitle('Enchanter 🪄')
-        .setDescription('**Stats:**\nLess base ATK\nMore base HP\nLess base Speed\nMore base Mana\nHas 3 abilities and 1 ultimate\n\n**Abilities:**\nHeal player for 30% (10 + 1% Magic Power), increased by 20% if the Player is below 30% HP\nWork in progresss')
+        .setDescription('**Stats:**\nLess base ATK\nMore base HP\nLess base Speed\nMore base Mana PER ATTACK\n\n**Good for support and damage**')
         .setColor('#00EAFF');
 
     interaction.editReply({ embeds: [classEmbed, warriorEmbed, archerEmbed, enchanterEmbed], components: [row] });

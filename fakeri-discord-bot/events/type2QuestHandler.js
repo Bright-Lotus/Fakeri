@@ -60,8 +60,9 @@ module.exports = {
                             await setDoc(doc(db, `${message.author.id}/EventQuestProgression/Weekly/${week}`), { [`mission${quest.position}`]: (missionGoal) }, { merge: true });
                             return;
                         }
-
-                        if (reaction.message.channelId != quest.targetChannel) {
+                        const targetChannels = quest?.targetChannel?.split('|') || [ reaction.message.channelId ];
+                        console.log(targetChannels, 'debug');
+                        if (!targetChannels.some((channel) => reaction.message.channelId == channel)) {
                             return;
                         }
 
@@ -70,7 +71,7 @@ module.exports = {
                         }
 
                         if ((current + 1) >= missionGoal) {
-                            reaction.message.client.emit('questCompleted', mission, message);
+                            reaction.message.client.emit('questCompleted', mission, message.author, week);
                             message.author.send('You have completed a quest!');
                         }
 

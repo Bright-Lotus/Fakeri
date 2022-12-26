@@ -139,6 +139,8 @@ module.exports = {
                                     xpManager('give', baseXp, user);
                                     goldManager('give', 50, user);
 
+                                    reaction.client.emit('type7QuestProgress', usr, reaction.client);
+
                                     rewarded.push(userID);
                                     await updateDoc(doc(db, 'Event/GiftDrops'), {
                                         ['activeDrop.usersRewarded']: rewarded,

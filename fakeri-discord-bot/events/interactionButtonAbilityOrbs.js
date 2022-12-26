@@ -27,7 +27,7 @@ module.exports = {
                 return interaction.editReply({ embeds: [abilityOrbEmbed] });
             }
         }
-        if (!interaction.customId.includes('Button')) return;
+        if (!interaction.customId.includes('Button') || interaction.customId.includes('filterButton')) return;
         console.log(interaction.customId, 'loglogloglog');
         if (interaction.user.id != interaction.customId.split('/')[1]) {
             return interaction.reply({ embeds: [ErrorEmbed(EventErrors.NotOwnerOfPagination)], ephemeral: true });

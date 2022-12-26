@@ -11,6 +11,10 @@ Error Code 5: NotEnoughLevelForZone: When the player is underleveled for a farmi
 Error Code 6: PlayerIsDead: When the player attempts to do an action in the event but is dead
 Error Code 7: PlayerNotRegistered: When the player is not registered in the bot
 Error Code 8: When the player has reached the maximum limit of 3 active battles at once
+Error Code 9: When the interaction creator is not the owner of the original component
+Error Code 10: Same as ERR C9
+Error Code 11: When the interaction creator is not the owner of the dialog
+Error Code 12: Zone is only for enchanters
 */
 const EventErrors = Object.freeze({
     NotEnoughGold: Symbol(0),
@@ -25,6 +29,7 @@ const EventErrors = Object.freeze({
     NotOwnerOfPagination: Symbol(9),
     NotOwnerOfInteraction: Symbol(10),
     NotOwnerOfDialog: Symbol(11),
+    EnchanterOnlyZone: Symbol(12),
 });
 
 function ErrorEmbed(errorCode, args) {
@@ -33,6 +38,7 @@ function ErrorEmbed(errorCode, args) {
         case EventErrors.NotEnoughGold:
             return new EmbedBuilder()
                 .setColor('Red')
+                .setAuthor({ name: 'Banco Aelram ◑ Rechazo' })
                 .setTitle('No tienes suficiente dinero')
                 .setDescription(args);
 
@@ -92,15 +98,20 @@ function ErrorEmbed(errorCode, args) {
         case EventErrors.NotOwnerOfInteraction:
             return new EmbedBuilder()
                 .setColor('Red')
+                .setDescription('No puedes usar interacciones que no son tuyas')
                 .setTitle('Esta interaccion no es tuya!');
 
         case EventErrors.NotOwnerOfDialog:
             return new EmbedBuilder()
                 .setColor('Red')
+                .setDescription('No puedes continuar un dialogo que no es tuyo')
                 .setTitle('Este dialogo no es tuyo!');
 
-        default:
-            break;
+        case EventErrors.EnchanterOnlyZone:
+            return new EmbedBuilder()
+            .setColor('Red')
+            .setTitle('Esta zona esta hecha solo para **Enchanters**')
+            .setDescription('Usa el canal respectivo para tu clase.');
     }
 }
 
