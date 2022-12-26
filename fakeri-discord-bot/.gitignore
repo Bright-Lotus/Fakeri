@@ -110,9 +110,6 @@ garbage
 asdf.js
 yay.js
 
-# Fucking firebase private config
-firebaseConfig.js
-
 # Env (discord token and shit)
 .env
 
