@@ -26,8 +26,8 @@ CLIENT_ID=
 If you also want, you can set a testing bot discord token and client ID in the .env and use `node . test` to login to that bot
 
 ```
-DISCORD_TEST_BOT_TOKEN=MTA0OTc3MTgyMTY0MzMzMzc0NA.GLYU5s.k7H6niLPUAGHn0aOK00SqTIMBO273h7wOkFzfE
-TEST_BOT_CLIENT_ID=1049771821643333744
+DISCORD_TEST_BOT_TOKEN=
+TEST_BOT_CLIENT_ID=
 ```
 
 You can also set the bot version in the .env for display in the /credits command
