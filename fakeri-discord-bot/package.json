@@ -1,6 +1,6 @@
 {
   "name": "fakeri",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Discord bot for events and duels",
   "main": "main.js",
   "scripts": {
