@@ -20,24 +20,18 @@ module.exports = {
             user.client.emit('type10QuestProgress', user, user.client);
             if (week == 'Nora' || week == 'Arissa' || week == 'Abe' || week == 'Lyra') {
                 if (mission?.onComplete) {
-                    switch (mission?.onComplete.function) {
-                        case 'setActiveDialog': {
-                            for (const target of mission?.onComplete.targets || []) {
-                                const [targetCharacter, targetDialog] = [target.split('/')[0], target.split('/')[1]];
-                                await updateDoc(doc(db, user.id, 'EventDialogProgression'), {
-                                    [`${targetCharacter}.activeDialog`]: targetDialog,
-                                }, { merge: true });
-                                const completedInstructorEmbed = new EmbedBuilder()
-                                    .setTitle(`Has completado una mision de ${week}!`)
-                                    .setColor('Green')
-                                    .setDescription(`Habla con ${week} de nuevo!`);
-                                user.send({ embeds: [completedInstructorEmbed] });
-                            }
-                            break;
+                    if (mission?.onComplete.function == 'setActiveDialog') {
+                        for (const target of mission?.onComplete.targets || []) {
+                            const [targetCharacter, targetDialog] = [target.split('/')[0], target.split('/')[1]];
+                            await updateDoc(doc(db, user.id, 'EventDialogProgression'), {
+                                [`${targetCharacter}.activeDialog`]: targetDialog,
+                            }, { merge: true });
+                            const completedInstructorEmbed = new EmbedBuilder()
+                                .setTitle(`Has completado una mision de ${week}!`)
+                                .setColor('Green')
+                                .setDescription(`Habla con ${week} de nuevo!`);
+                            user.send({ embeds: [completedInstructorEmbed] });
                         }
-
-                        default:
-                            break;
                     }
                 }
                 await goldManager('give', mission.rewards.gold, user);

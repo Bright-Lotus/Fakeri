@@ -41,7 +41,7 @@ module.exports = {
     execute: async function(interaction) {
         await event(interaction);
     },
-    contextMenuExecute: async function (interaction, selected) {
+    contextMenuExecute: async function(interaction, selected) {
         const playerClass = await (await getDoc(doc(db, interaction.user.id, 'PlayerInfo'))).data().class;
         let instructor;
         switch (playerClass) {
@@ -382,9 +382,9 @@ async function quests(interaction, weekToDisplay, selectMenu) {
                         ctx.fillText(`${mission0}/${quest0Goal}`, (!weekToDisplay.includes('Week')) ? 1200 : 1235, (sizeOf('./questUI1.png').height - 1475));
                         ctx.font = '40px "Burbank Big"';
                         ctx.fillStyle = (mission0 == quest0Goal) ? '#10CD19' : '#3284EC';
-                        ctx.fillRect(279, (sizeOf('./questUI1.png').height - 1511), Math.round(((mission0 / quest0Goal * 100) / 100) * 873), 35);
+                        ctx.fillRect(279, (sizeOf('./questUI1.png').height - 1511), Math.floor(((mission0 / quest0Goal * 100) / 100) * 873), 35);
                         ctx.fillStyle = '#ffffff';
-                        let mission0XCoordinates = Math.round((((weekly.data().mission0 / quest0Goal * 100) - 10) / 100) * 873);
+                        let mission0XCoordinates = Math.floor((((weekly.data().mission0 / quest0Goal * 100) - 10) / 100) * 873);
                         mission0XCoordinates += 289;
                         if (mission0XCoordinates <= 288) {
                             mission0XCoordinates = 288;
@@ -393,7 +393,7 @@ async function quests(interaction, weekToDisplay, selectMenu) {
                         if (mission0XCoordinates >= 1070) {
                             mission0XCoordinates = 1070;
                         }
-                        ctx.fillText(`${Math.round((mission0 / quest0Goal) * 100)}%`, mission0XCoordinates, (sizeOf('./questUI1.png').height - 1480));
+                        ctx.fillText(`${Math.floor((mission0 / quest0Goal) * 100)}%`, mission0XCoordinates, (sizeOf('./questUI1.png').height - 1480));
                         console.log(weekly.id, ' => ', weekly.data().mission1);
                         break;
                     }
@@ -404,7 +404,7 @@ async function quests(interaction, weekToDisplay, selectMenu) {
                         ctx.fillText(`${mission1}/${quest1Goal}`, 1200, (sizeOf('./questUI1.png').height - 1086));
                         ctx.font = '40px "Burbank Big"';
                         ctx.fillStyle = (mission1 == quest1Goal) ? '#10CD19' : '#3284EC';
-                        ctx.fillRect(279, (sizeOf('./questUI1.png').height - 1119), Math.round(((weekly.data().mission1 / quest1Goal * 100) / 100) * 873), 35);
+                        ctx.fillRect(279, (sizeOf('./questUI1.png').height - 1119), Math.floor(((weekly.data().mission1 / quest1Goal * 100) / 100) * 873), 35);
                         ctx.fillStyle = '#ffffff';
                         xCoordinates += 289;
                         if (xCoordinates <= 288) {
@@ -414,7 +414,7 @@ async function quests(interaction, weekToDisplay, selectMenu) {
                         if (xCoordinates >= 1070) {
                             xCoordinates = 1070;
                         }
-                        ctx.fillText(`${Math.round((mission1 / quest1Goal) * 100)}%`, xCoordinates, (sizeOf('./questUI1.png').height - 1087));
+                        ctx.fillText(`${Math.floor((mission1 / quest1Goal) * 100)}%`, xCoordinates, (sizeOf('./questUI1.png').height - 1087));
                         console.log(weekly.id, ' => ', weekly.data().mission1);
                         break;
 
@@ -424,7 +424,7 @@ async function quests(interaction, weekToDisplay, selectMenu) {
                         ctx.fillText(`${mission2}/${quest2Goal}`, 1200, (sizeOf('./questUI1.png').height - 863));
                         ctx.font = '40px "Burbank Big"';
                         ctx.fillStyle = (mission2 == quest2Goal) ? '#10CD19' : '#3284EC';
-                        ctx.fillRect(279, (sizeOf('./questUI1.png').height - 894), Math.round(((weekly.data().mission2 / quest2Goal * 100) / 100) * 873), 35);
+                        ctx.fillRect(279, (sizeOf('./questUI1.png').height - 894), Math.floor(((weekly.data().mission2 / quest2Goal * 100) / 100) * 873), 35);
                         ctx.fillStyle = '#ffffff';
                         xCoordinates += 289;
                         if (xCoordinates <= 288) {
@@ -434,7 +434,7 @@ async function quests(interaction, weekToDisplay, selectMenu) {
                         if (xCoordinates >= 1070) {
                             xCoordinates = 1070;
                         }
-                        ctx.fillText(`${Math.round((mission2 / quest2Goal) * 100)}%`, xCoordinates, (sizeOf('./questUI1.png').height - 863));
+                        ctx.fillText(`${Math.floor((mission2 / quest2Goal) * 100)}%`, xCoordinates, (sizeOf('./questUI1.png').height - 863));
                         break;
 
                     case 'mission3':
@@ -443,7 +443,7 @@ async function quests(interaction, weekToDisplay, selectMenu) {
                         ctx.fillText(`${mission3}/${quest3Goal}`, 1200, (sizeOf('./questUI1.png').height - 640));
                         ctx.font = '40px "Burbank Big"';
                         ctx.fillStyle = (mission3 == quest3Goal) ? '#10CD19' : '#3284EC';
-                        ctx.fillRect(279, (sizeOf('./questUI1.png').height - 671), Math.round(((weekly.data().mission3 / quest3Goal * 100) / 100) * 900), 35);
+                        ctx.fillRect(279, (sizeOf('./questUI1.png').height - 671), Math.floor(((weekly.data().mission3 / quest3Goal * 100) / 100) * 900), 35);
                         ctx.fillStyle = '#ffffff';
                         xCoordinates += 289;
                         if (xCoordinates <= 288) {
@@ -453,7 +453,7 @@ async function quests(interaction, weekToDisplay, selectMenu) {
                         if (xCoordinates >= 1070) {
                             xCoordinates = 1070;
                         }
-                        ctx.fillText(`${Math.round((mission3 / quest3Goal) * 100)}%`, xCoordinates, (sizeOf('./questUI1.png').height - 640));
+                        ctx.fillText(`${Math.floor((mission3 / quest3Goal) * 100)}%`, xCoordinates, (sizeOf('./questUI1.png').height - 640));
                         break;
 
                     case 'mission4':
@@ -462,9 +462,9 @@ async function quests(interaction, weekToDisplay, selectMenu) {
                         ctx.fillText(`${mission4}/${quest4Goal}`, 1200, (sizeOf('./questUI1.png').height - 400));
                         ctx.font = '40px "Burbank Big"';
                         ctx.fillStyle = (mission4 == quest4Goal) ? '#10CD19' : '#3284EC';
-                        ctx.fillRect(277, (sizeOf('./questUI1.png').height - 435), Math.round(((mission4 / quest4Goal * 100) / 100) * 876), 35);
+                        ctx.fillRect(277, (sizeOf('./questUI1.png').height - 435), Math.floor(((mission4 / quest4Goal * 100) / 100) * 876), 35);
                         ctx.fillStyle = '#ffffff';
-                        xCoordinates = Math.round((((mission4 / quest4Goal * 100) - 10) / 100) * 873);
+                        xCoordinates = Math.floor((((mission4 / quest4Goal * 100) - 10) / 100) * 873);
 
                         xCoordinates += 289;
                         if (xCoordinates <= 288) {
@@ -474,7 +474,7 @@ async function quests(interaction, weekToDisplay, selectMenu) {
                         if (xCoordinates >= 1070) {
                             xCoordinates = 1070;
                         }
-                        ctx.fillText(`${Math.round((mission4 / quest4Goal) * 100)}%`, xCoordinates, (sizeOf('./questUI1.png').height - 404));
+                        ctx.fillText(`${Math.floor((mission4 / quest4Goal) * 100)}%`, xCoordinates, (sizeOf('./questUI1.png').height - 404));
                         console.log(weekly.id, ' => ', weekly.data().mission1);
                         break;
 
@@ -484,9 +484,9 @@ async function quests(interaction, weekToDisplay, selectMenu) {
                         ctx.fillText(`${mission5}/${quest5Goal}`, 1200, (sizeOf('./questUI1.png').height - 165));
                         ctx.font = '40px "Burbank Big"';
                         ctx.fillStyle = (mission5 == quest5Goal) ? '#10CD19' : '#3284EC';
-                        ctx.fillRect(277, (sizeOf('./questUI1.png').height - 194), Math.round(((mission5 / quest5Goal * 100) / 100) * 902), 35);
+                        ctx.fillRect(277, (sizeOf('./questUI1.png').height - 194), Math.floor(((mission5 / quest5Goal * 100) / 100) * 902), 35);
                         ctx.fillStyle = '#ffffff';
-                        xCoordinates = Math.round((((mission5 / quest5Goal * 100) - 10) / 100) * 873);
+                        xCoordinates = Math.floor((((mission5 / quest5Goal * 100) - 10) / 100) * 873);
 
                         xCoordinates += 289;
                         if (xCoordinates <= 288) {
@@ -496,7 +496,7 @@ async function quests(interaction, weekToDisplay, selectMenu) {
                         if (xCoordinates >= 1070) {
                             xCoordinates = 1070;
                         }
-                        ctx.fillText(`${Math.round((mission5 / quest5Goal) * 100)}%`, xCoordinates, (sizeOf('./questUI1.png').height - 160));
+                        ctx.fillText(`${Math.floor((mission5 / quest5Goal) * 100)}%`, xCoordinates, (sizeOf('./questUI1.png').height - 160));
                         break;
 
                     default:
@@ -508,14 +508,12 @@ async function quests(interaction, weekToDisplay, selectMenu) {
         const questEmbed = new EmbedBuilder()
             .setTitle(`${weekToDisplay} Player Quests`)
             .setColor('#3284EC')
-            .setDescription('You can claim rewards with `/event quests claim`');
+            .setDescription('Saldran nuevas misiones cada semana!');
 
         if (weekUnlocked && !selectMenu) {
             return interaction.editReply({ files: [ attachment ], components: [ row ], embeds: [ questEmbed ] });
         }
-        else if (weekUnlocked && selectMenu) {
-            return interaction.editReply({ files: [ attachment ], components: [ row ], embeds: [ questEmbed ] });
-        }
+        return interaction.editReply({ files: [ attachment ], components: [ row ], embeds: [ questEmbed ] });
     });
     // Quest 2 ctx.fillText('90/200', 1200, (sizeOf('./questUI1.png').height - 863));
     // Quest 3 ctx.fillText('90/200', 1200, (sizeOf('./questUI1.png').height - 640));

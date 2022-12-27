@@ -69,19 +69,19 @@ async function giftsDrop(client) {
     const timeoutArray = [];
     const channels = await getDoc(doc(db, 'Event/GiftDrops'));
     const msgs = [];
-    const giftColors = ['Blue', 'Green', 'Red', 'Pink', 'Ourple', 'Yellow'];
-    const randomItem = giftColors[Math.floor(Math.random() * giftColors.length)];
+    const giftColors = [ 'Blue', 'Green', 'Red', 'Pink', 'Ourple', 'Yellow' ];
+    const randomItem = giftColors[ Math.floor(Math.random() * giftColors.length) ];
     if (channels.exists()) {
         Object.entries(channels.data()).forEach(async channel => {
             for (let index = 0; index < 2; index++) {
-                if (channel[0] == 'activeDrop') return;
-                const guildId = channel[0];
+                if (channel[ 0 ] == 'activeDrop') return;
+                const guildId = channel[ 0 ];
 
-                const giftDropsDaily = channel[1].daily;
+                const giftDropsDaily = channel[ 1 ].daily;
                 let giftDropsChannel;
                 try {
                     await client.guilds.fetch(guildId).then(async guild => {
-                        await guild.channels.fetch(channel[1].channel).then(dropsChannel => giftDropsChannel = dropsChannel);
+                        await guild.channels.fetch(channel[ 1 ].channel).then(dropsChannel => giftDropsChannel = dropsChannel);
                     });
                 }
                 catch (e) {
@@ -94,7 +94,9 @@ async function giftsDrop(client) {
                 const dropNight = new Timestamp(giftDropsDaily.night.seconds, giftDropsDaily.night.nanoseconds).toDate();
 
                 const dropTime = (index == 0) ? dropDay : dropNight;
-                const dropTimeVerbal = (index == 0) ? 'day' : 'night';
+
+                // TODO: Night animations (index == 0) ? 'day' : 'day';
+                const dropTimeVerbal = 'day';
 
                 dropDay.setDate(new Date().getDate());
                 dropDay.setMonth(new Date().getMonth());
@@ -123,8 +125,8 @@ async function giftsDrop(client) {
                         .setColor('#1370E4');
 
                     dropsChannel.send({
-                        embeds: [portalBlue],
-                        files: [new AttachmentBuilder('https://files.catbox.moe/p57xmr.mp4', { name: 'portal_blue.mp4' })],
+                        embeds: [ portalBlue ],
+                        files: [ new AttachmentBuilder('https://files.catbox.moe/p57xmr.mp4', { name: 'portal_blue.mp4' }) ],
                     });
                 }, Math.abs(diffDay) - 36e5, diffDay, giftDropsChannel);
 
@@ -138,12 +140,12 @@ async function giftsDrop(client) {
                     const giftEmbed = new EmbedBuilder()
                         .setTitle('Un regalo ha caido del portal! 🎁')
                         .setDescription('Necesitamos 20 personas que ayuden a abrirlo! 🫳')
-                        .setColor(Colors[randomItem]);
+                        .setColor(Colors[ randomItem ]);
                     console.log('Thy event is now');
                     dropsChannel.sendTyping();
 
                     const fallVideoFilePath = path.join(__dirname, '..', 'assets', 'giftVideos', 'giftFallColors', `${randomItem.toLowerCase()}_fall_${dropTimeVerbal}.mp4`);
-                    dropsChannel.send({ embeds: [giftEmbed], files: [new AttachmentBuilder(fallVideoFilePath, { name: `gift_fall_${randomItem.toLowerCase()}.mp4` })] })
+                    dropsChannel.send({ embeds: [ giftEmbed ], files: [ new AttachmentBuilder(fallVideoFilePath, { name: `gift_fall_${randomItem.toLowerCase()}.mp4` }) ] })
                         .then(async msg => {
                             const endTime = new Date();
                             const giftEnd = new Date();
@@ -155,7 +157,7 @@ async function giftsDrop(client) {
                             msgs.push(msg.id);
 
                             await updateDoc(doc(db, 'Event/GiftDrops'), {
-                                ['activeDrop']: {
+                                [ 'activeDrop' ]: {
                                     progress: 0,
                                     goal: 20,
                                     totalEnd: Timestamp.fromDate(endTime),
@@ -178,7 +180,7 @@ async function giftsDrop(client) {
                             .setDescription('Portal experts say it may become dangerous\nPortal experts also say it\'s emanating a kind of Dark Energy/Magic.')
                             .setColor('#DE00FF');
 
-                        dropChannel.send({ embeds: [portalLaserNoParticles] });
+                        dropChannel.send({ embeds: [ portalLaserNoParticles ] });
 
                         setTimeout((giftDropChannel) => {
                             const portalLaserParticles = new EmbedBuilder()
@@ -186,21 +188,21 @@ async function giftsDrop(client) {
                                 .setDescription('Analysis show high energy signatures meaning certain destruction\n\n"We don\'t know what may come out of that portal, but something really destructive for sure"\n\n"The path that this... thing will most likely take, is going to hit and obliterate the gift, also obliterating it\'s insides."\n- Nakthiji (Portal Analysis Team)')
                                 .setColor('#DE00FF');
 
-                            giftDropChannel.send({ embeds: [portalLaserParticles] });
+                            giftDropChannel.send({ embeds: [ portalLaserParticles ] });
 
 
                         }, 18e5, dropChannel);
 
                         setTimeout(async (giftChannel) => {
-                            const destructionVideoFilePath = path.join(__dirname, '..', 'assets', 'giftVideos', 'giftDestructionColors', randomItem.toLowerCase(), `${randomItem.toLowerCase()}_gift_${dropTimeVerbal}_destruction_v${Math.floor(Math.random() * 3)}.mp4`);
+                            const __destructionVideoFilePath = path.join(__dirname, '..', 'assets', 'giftVideos', 'giftDestructionColors', randomItem.toLowerCase(), `${randomItem.toLowerCase()}_gift_${dropTimeVerbal}_destruction_v${Math.floor(Math.random() * 3)}.mp4`);
                             const destructionEmbed = new EmbedBuilder()
                                 .setTitle('El regalo ha sido destruido')
                                 .setDescription('Ya no es posible reclamar recompensas')
                                 .setColor('#DE00FF');
-
-                            giftChannel.send({ embeds: [destructionEmbed] /*files: [new AttachmentBuilder(destructionVideoFilePath, { name: `gift_destruction_${randomItem.toLowerCase()}.mp4` })]*/ });
+                            /* TODO: Night animations files: [new AttachmentBuilder(destructionVideoFilePath, { name: `gift_destruction_${randomItem.toLowerCase()}.mp4` })]*/
+                            giftChannel.send({ embeds: [ destructionEmbed ] });
                             await updateDoc(doc(db, 'Event/GiftDrops'), {
-                                ['activeDrop.destroyed']: true,
+                                [ 'activeDrop.destroyed' ]: true,
                             }, { merge: true });
                         }, 36e5, dropChannel);
 
