@@ -133,7 +133,7 @@ module.exports = {
                                         const rewardEmbed = new EmbedBuilder()
                                             .setTitle('Gift Drop Rewards!')
                                             .setDescription('Thanks for helping open the gift, here are your rewards:')
-                                            .setColor(Colors[ activeDrop.giftColor ])
+                                            .setColor(Colors[ Utils.CapitalizeFirstLetter(activeDrop.giftColor) ])
                                             .addFields(
                                                 { name: underscore('XP'), value: `${finalXp} XP (XP Bonus applied)` },
                                                 { name: underscore('Gold'), value: '50 GOLD' },
