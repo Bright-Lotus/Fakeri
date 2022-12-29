@@ -117,7 +117,7 @@ async function giftsDrop(client) {
                                     pendingRewards: [],
                                     multiplier: 0.0,
                                     openMsgs: [],
-                                    giftColor: randomItem,
+                                    giftColor: randomItem.toLowerCase(),
                                 },
                             }, { merge: true });
                         });
