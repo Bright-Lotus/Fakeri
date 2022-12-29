@@ -1,4 +1,6 @@
 # Fakeri
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/Zelda-Zamora/Fakeri?style=flat-square) ![Discord](https://img.shields.io/discord/972563929836445778?label=discord&?style=flat-square) ![Discord](https://img.shields.io/discord/793370605382664203?label=discord&?style=flat-square) ![Website](https://img.shields.io/website?style=flat-square&url=https%3A%2F%2Ffakeri.vercel.app%2F) ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/Zelda-Zamora/Fakeri?style=flat-square) ![GitHub](https://img.shields.io/github/license/Zelda-Zamora/Fakeri?style=flat-square)
+
 This bot will mainly be used for the Event
 
 You can look at the code if you want
