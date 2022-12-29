@@ -6,6 +6,7 @@ const { xpManager } = require('../handlers/xpHandler.js');
 const path = require('node:path');
 const { Colors } = require('../emums/colors.js');
 const { goldManager } = require('../handlers/goldHandler.js');
+const { Utils } = require('../utils.js');
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -93,7 +94,7 @@ module.exports = {
                         const giftOpenedEmbed = new EmbedBuilder()
                             .setTitle('Goal achieved! 🎉')
                             .setDescription('The gift has opened!\nThe rewards have been given to everyone who helped open it')
-                            .setColor(Colors[ activeDrop.giftColor ])
+                            .setColor(Colors[ Utils.CapitalizeFirstLetter(activeDrop.giftColor) ])
                             .addFields(
                                 { name: 'If you didn\'t help open the gift...', value: 'React with 🎁 to this message to claim your rewards!' },
                             );
