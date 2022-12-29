@@ -1,7 +1,8 @@
 const { getFirestore, doc, setDoc, getDocs, collection } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
 const { firebaseConfig } = require('../firebaseConfig.js');
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, chatInputApplicationCommandMention } = require('discord.js');
+const { CommandIds } = require('../emums/commandIds.js');
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);

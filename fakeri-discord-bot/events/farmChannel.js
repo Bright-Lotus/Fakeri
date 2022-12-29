@@ -1,4 +1,4 @@
-const { EmbedBuilder, ActionRowBuilder, SelectMenuBuilder, Events, bold, underscore, formatEmoji, hyperlink } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, SelectMenuBuilder, Events, bold, underscore, formatEmoji, hyperlink, chatInputApplicationCommandMention } = require('discord.js');
 
 const { getFirestore, doc, getDocs, collection, getDoc } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
@@ -7,6 +7,7 @@ const { ErrorEmbed, EventErrors } = require('../errors/errors.js');
 const { Icons } = require('../emums/icons.js');
 const { pagination } = require('../handlers/paginationHandler.js');
 const { Utils } = require('../utils.js');
+const { CommandIds } = require('../emums/commandIds.js');
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -119,7 +120,7 @@ module.exports = {
             if (!playerInfo.exists() && message.content == 'attack') {
                 return message.reply({ embeds: [ ErrorEmbed(EventErrors.PlayerNotRegistered) ] });
             }
-            if (playerInfo.data().dead) {
+            if (playerInfo.data()?.dead) {
                 return message.reply({ embeds: [ ErrorEmbed(EventErrors.PlayerIsDead) ] });
             }
 
@@ -135,10 +136,11 @@ module.exports = {
                             farmChannelName += Utils.CapitalizeFirstLetter(element) + ' ';
                         });
                         enemiesListEmbed.setAuthor({ name: `Actualmente estas en ${farmChannelName}` });
+                        console.log('debugarcher', playerInfo.data().playerLvl + 5, farmChannel.minLvl, (playerInfo.data().class == 'archer' && playerInfo.data().playerLvl + 5 < farmChannel.minLvl));
                         if (playerInfo.data().class == 'archer' && playerInfo.data().playerLvl + 5 < farmChannel.minLvl) {
-                            return message.reply({ embeds: [ ErrorEmbed(EventErrors.NotEnoughLevelForZone, `Necesitas ser nivel ${Icons.Level} ${bold(farmChannel.minLvl)} para esta zona\nEres nivel ${Icons.Level} ${bold(playerInfo.data().playerLvl)} ahora mismo.`) ] });
+                            return message.reply({ embeds: [ ErrorEmbed(EventErrors.NotEnoughLevelForZone, `Necesitas ser nivel ${Icons.Level} ${bold(farmChannel.minLvl)} para esta zona\nEres nivel ${Icons.Level} ${bold(playerInfo.data().playerLvl + 5)} 🏹 ahora mismo.`) ] });
                         }
-                        if (playerInfo.data().playerLvl < farmChannel.minLvl) {
+                        else if (playerInfo.data().class != 'archer' && playerInfo.data().playerLvl < farmChannel.minLvl) {
                             return message.reply({ embeds: [ ErrorEmbed(EventErrors.NotEnoughLevelForZone, `Necesitas ser nivel ${Icons.Level} ${bold(farmChannel.minLvl)} para esta zona\nEres nivel ${Icons.Level} ${bold(playerInfo.data().playerLvl)} ahora mismo.`) ] });
                         }
                         farmChannel.enemies.forEach(monsters => {
@@ -153,15 +155,16 @@ module.exports = {
                                 const randProp = randomProperty(monster.stats);
                                 let valueKeyword = (monster.keywords.length > 0) ? '-' : '';
                                 let keywordStr = '';
+                                if (monster.elite) {
+                                    monster.gold += monster.gold * 0.25;
+                                    monster.baseXp += monster.baseXp * 0.25;
+                                }
+                                monster.baseXp += Math.round((playerInfo.data().playerLvl / 0.1) ** 1);
+                                monster.gold += Math.round((playerInfo.data().playerLvl / 0.1) ** 0.9);
                                 for (const stat of Object.keys(monster.stats)) {
-                                    if (monster.elite) {
-                                        monster.gold += monster.gold * 0.25;
-                                        monster.baseXp += monster.baseXp * 0.25;
-                                    }
-                                    monster.baseXp += Math.round((playerInfo.data().playerLvl / 0.1) ** 1.3);
-                                    monster.gold += Math.round((playerInfo.data().playerLvl / 0.1) ** 0.9);
                                     if (playerInfo.data().class == 'archer' && playerInfo.data().playerLvl < farmChannel.minLvl) {
-                                        monster.stats[ stat ] -= Math.round((Math.abs(playerInfo.data().playerLvl - farmChannel.minLvl) / constant) ** power);
+                                        monster.stats[ stat ] += Math.round((playerInfo.data().playerLvl / constant) ** power);
+                                        monster.stats[ stat ] -= Math.round((Math.abs(playerInfo.data().playerLvl - farmChannel.minLvl) / 0.1) ** 0.5);
                                         if (monster.stats[ stat ] < 0) {
                                             monster.stats[ stat ] = 0;
                                         }
@@ -350,7 +353,15 @@ module.exports = {
 
                     const playerEquipment = await getDoc(doc(db, message.author.id, 'PlayerInfo/Inventory/Equipment'));
                     if (playerInfo.exists()) {
-                        const consumables = Object.values(playerEquipment.data().consumables).filter(element => typeof element != 'number');
+                        const consumables = Object.values(playerEquipment?.data()?.consumables || {}).filter(element => typeof element != 'number');
+                        if (consumables.length == 0) {
+                            const noConsumablesEmbed = new EmbedBuilder()
+                                .setTitle('No tienes ningún consumible!')
+                                .setDescription(`Compra alguno en la tienda! (${chatInputApplicationCommandMention('shop', CommandIds.Shop)})`)
+                                .setColor('#FF0000');
+                            message.reply({ embeds: [ noConsumablesEmbed ] });
+                            return;
+                        }
                         await pagination('consumables', consumables, 1, message.author).then(results => {
                             return message.reply({ embeds: [ results.embed ], components: [ results.paginationRow, results.selectMenuRow ] });
                         });

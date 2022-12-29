@@ -42,8 +42,7 @@ module.exports = {
                     .setColor('Red')
                     .setTitle('Algo inesperado ha sucedido!')
                     .setDescription(`Si el error continua por favor contacta a ${userMention('1011657604822474873')}`);
-                await interaction.editReply({ embeds: [errorEmbed], ephemeral: true });
-                await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+                await interaction.reply({ embeds: [errorEmbed] });
             }
             const errorChannelEmbed = new EmbedBuilder().setColor('Red')
                 .setTimestamp(new Date())

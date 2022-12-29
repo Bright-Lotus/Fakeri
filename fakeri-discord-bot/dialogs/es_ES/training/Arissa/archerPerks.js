@@ -49,11 +49,6 @@ module.exports = {
                     emoji: Icons.AcceptQuest,
                 },
             },
-            specialFunction: {
-                name: 'continueDialogInAnotherChannel',
-                // TODO: Set this channels to farm channel lvl 5
-                targetChannels: '1056677411955159082|1056701778160267294',
-            },
         },
         step5option1: {
             name: 'Arissa',
@@ -63,6 +58,11 @@ module.exports = {
                     text: 'Me parece bien',
                     emoji: Icons.SpeakBtn,
                 },
+            },
+            specialFunction: {
+                name: 'continueDialogInAnotherChannel',
+                // TODO: Set this channels to farm channel lvl 5
+                targetChannels: '1056677411955159082|1056701778160267294',
             },
         },
         step6option1: {
@@ -94,6 +94,10 @@ module.exports = {
                     emoji: Icons.SpeakBtn,
                 },
             },
+            specialFunction: {
+                name: 'setActiveDialog',
+                target: 'Nora/postEliteTutorial',
+            },
         },
         step9option1: {
             name: 'Arissa',
@@ -107,7 +111,7 @@ module.exports = {
         },
         step10option1: {
             name: 'Arissa',
-            message: 'Al menos... Dan mas recompensas\nTen cuidado con ellos, y sigue entrenando.',
+            message: 'Al menos... Dan mas recompensas\nTen cuidado con ellos, y tal vez deberias hablar con Nora.',
             options: {
                 option1: {
                     text: 'Entendido',

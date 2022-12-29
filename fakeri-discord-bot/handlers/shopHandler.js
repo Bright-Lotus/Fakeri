@@ -80,6 +80,9 @@ async function shop(action, interaction, page, previousEmbeds, category) {
 
 
         itemsArray.sort((a, b) => {
+            if (category == 'consumables') {
+                return (Number(a[ 1 ].price) - Number(b[ 1 ].price));
+            }
             return (Number(a[ 1 ].minLvl) - Number(b[ 1 ].minLvl));
         });
 

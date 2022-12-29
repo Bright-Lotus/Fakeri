@@ -1,59 +1,3 @@
-/* exmplae
-    tepmlate code   const giftEventTime = new Date(Date.now());
-        const christmasChannel = interaction.guild.channels.cache.get('1032013306631827546');
-        giftEventTime.setHours(giftEventTime.getHours() + 1);
-        christmasChannel.send(`<t:${Math.floor(giftEventTime.getTime() / 1000)}:R>`);
-        const giftEmbed = new EmbedBuilder()
-            .setTitle('A gift has fallen from the sky! 🎁')
-            .setDescription('React with 🫳 to open it! We have to reach 10 helpers!')
-            .setColor('#137FE4');
-
-        const portalBlue = new EmbedBuilder()
-            .setTitle('A mysterious portal has appeared in the sky! 🧿')
-            .setDescription(`Preliminar analysis tell something may come out of it <t:${Math.floor(giftEventTime.getTime() / 1000)}:R>`)
-            .setColor('#137FE4');
-
-        const portalLaserNoParticles = new EmbedBuilder()
-            .setTitle('Another portal has appeared in the heights of the sky! 🌫️')
-            .setDescription(`Portal experts say it may become dangerous <t:${Math.floor(giftEventTime.getTime() / 1000)}:R>\nPortal experts also say it's emanating a kind of Dark Energy/Magic.`)
-            .setColor('#DE00FF');
-
-        const portalLaserParticles = new EmbedBuilder()
-            .setTitle('UPDATE: The pink portal is charging a laser! 🌩️')
-            .setDescription('Analysis show high energy signatures meaning a probable laser of destruction\n\n"The path that the laser will take, is going to hit and obliterate the gift, also obliterating the reward."\n- Nakthiji (Portal Analysis Team)')
-            .setColor('#DE00FF');
-
-        christmasChannel.send({ embeds: [giftEmbed], files: [new AttachmentBuilder('https://files.catbox.moe/hgnbea.mp4', { name: 'gift_fall_blue.mp4' })] }).then(msg => {
-            msg.react('🫳');
-        });
-        const giftOpenedEmbed = new EmbedBuilder()
-            .setTitle('Goal achieved! 🎉')
-            .setDescription('The gift has opened! The rewards have been given to everyone who helped open it')
-            .setColor('#137FE4')
-            .addFields(
-                { name: 'If you didn\'t react before...', value: 'React with 🎁 to this message to claim your rewards!' },
-            );
-        christmasChannel.send({
-            embeds: [giftOpenedEmbed],
-            files: [new AttachmentBuilder('https://files.catbox.moe/jy0dyu.mp4', { name: 'opening_gift.mp4' })],
-        }).then(msg => {
-            msg.react('🎁');
-        });
-
-        christmasChannel.send({
-            embeds: [portalBlue],
-            files: [new AttachmentBuilder('https://files.catbox.moe/p57xmr.mp4', { name: 'portal_blue.mp4' })],
-        });
-
-        christmasChannel.send({
-            embeds: [portalLaserNoParticles],
-            files: [new AttachmentBuilder('https://files.catbox.moe/36rc24.mp4', { name: 'portal_laser.mp4' })],
-        });
-
-        christmasChannel.send({
-            embeds: [portalLaserParticles],
-            files: [new AttachmentBuilder('https://files.catbox.moe/ttxpld.mp4', { name: 'portal_laser_charging.mp4' })],
-        }); */
 const { getFirestore, Timestamp, doc, getDoc, updateDoc } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
 const { firebaseConfig } = require('../firebaseConfig.js');
@@ -69,6 +13,7 @@ async function giftsDrop(client) {
     const timeoutArray = [];
     const channels = await getDoc(doc(db, 'Event/GiftDrops'));
     const msgs = [];
+    const dropChannels = [];
     const giftColors = [ 'Blue', 'Green', 'Red', 'Pink', 'Ourple', 'Yellow' ];
     const randomItem = giftColors[ Math.floor(Math.random() * giftColors.length) ];
     if (channels.exists()) {
@@ -135,11 +80,13 @@ async function giftsDrop(client) {
                     console.log('Thy event is half hour');
                 }, Math.abs(diffDay) - 18e5, diffDay, giftDropsChannel);
 
-                const timeout3 = setTimeout((dropsChannel) => {
+                const timeout3 = setTimeout(async (dropsChannel) => {
 
+                    const playerCount = await (await getDoc(doc(db, 'Event/Players'))).data().members.length;
+                    const goal = Math.floor(playerCount * 0.6) - 1;
                     const giftEmbed = new EmbedBuilder()
                         .setTitle('Un regalo ha caido del portal! 🎁')
-                        .setDescription('Necesitamos 20 personas que ayuden a abrirlo! 🫳')
+                        .setDescription(`Necesitamos **${goal}** personas que ayuden a abrirlo! 🫳`)
                         .setColor(Colors[ randomItem ]);
                     console.log('Thy event is now');
                     dropsChannel.sendTyping();
@@ -155,14 +102,15 @@ async function giftsDrop(client) {
 
                             await msg.react('🫳');
                             msgs.push(msg.id);
-
+                            dropChannels.push(dropsChannel.id);
                             await updateDoc(doc(db, 'Event/GiftDrops'), {
                                 [ 'activeDrop' ]: {
                                     progress: 0,
-                                    goal: 20,
+                                    goal: goal,
                                     totalEnd: Timestamp.fromDate(endTime),
                                     giftTimeout: Timestamp.fromDate(giftEnd),
                                     messages: msgs,
+                                    channels: dropChannels,
                                     opened: false,
                                     destroyed: false,
                                     usersRewarded: [],

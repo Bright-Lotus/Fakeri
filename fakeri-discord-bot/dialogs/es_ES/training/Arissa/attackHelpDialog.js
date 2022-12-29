@@ -24,6 +24,11 @@ module.exports = {
                     emoji: Icons.SpeakBtn,
                 },
             },
+            specialFunction: {
+                name: 'continueDialogInAnotherChannel',
+                // TODO: Set this channels to farm channel lvl 1
+                targetChannels: '1056673122373353595|1056701598258176060',
+            },
         },
         step3option1: {
             name: 'Arissa',

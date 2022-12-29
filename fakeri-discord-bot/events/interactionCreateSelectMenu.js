@@ -311,7 +311,17 @@ module.exports = {
                         }, { merge: true });
                         break;
                     }
+
                     case 'mana': {
+                        if (consumable.consumableAmount == 0) {
+                            const noMoreConsumableEmbed = new EmbedBuilder()
+                                .setTitle('Ya no tienes mas de este consumible')
+                                .setColor('Red')
+                                .setDescription(`Puedes usar ${chatInputApplicationCommandMention('shop', CommandIds.Shop)} para comprar mas`);
+                            interaction.reply({ embeds: [ noMoreConsumableEmbed ] });
+                            return;
+                        }
+
                         const manaEmbed = new EmbedBuilder()
                             .setTitle('Has usado el consumible')
                             .setColor('Blue')
@@ -320,9 +330,14 @@ module.exports = {
                         await updateDoc(doc(db, interaction.user.id, 'PlayerInfo'), {
                             [ 'stats.mana' ]: increment(consumable.amount),
                         }, { merge: true });
+                        await updateDoc(doc(db, interaction.user.id, 'PlayerInfo/Inventory/Equipment'), {
+                            [ `consumables.consumable${consumableID}.consumableAmount` ]: (consumable.consumableAmount != 0) ? increment(-1) : 0,
+                        }, { merge: true });
+                        break;
                     }
                 }
             }
+            return;
         }
 
         if (interaction.customId.includes('inventorySwordsModal-selectMenu/')) {
@@ -762,15 +777,19 @@ module.exports = {
             });
             return;
         }
-        await interaction.deferUpdate();
 
         if (interaction.customId.includes('class-select/')) {
             if (interaction.user.id != interaction.customId.split('/')[ 1 ]) {
                 return interaction.reply({ embeds: [ ErrorEmbed(EventErrors.NotOwnerOfInteraction) ], ephemeral: true });
             }
+            await interaction.deferUpdate();
             await classSelect(interaction);
             return;
         }
+        if (interaction.user.id != interaction.customId.split('/')[ 1 ]) {
+            return interaction.reply({ embeds: [ ErrorEmbed(EventErrors.NotOwnerOfInteraction) ], ephemeral: true });
+        }
+        await interaction.deferUpdate();
         contextMenuExecute(interaction, interaction.values[ 0 ]);
         console.log(`${interaction.user.tag} in #${interaction.channel.name} triggered an interaction.`);
     },
@@ -824,10 +843,10 @@ async function classSelect(interaction) {
         xp: 0,
     };
     await setDoc(doc(db, `${interaction.user.id}/EventDialogProgression`), {
-            [ 'Nora' ]: { activeDialog: 'default' },
-            [ 'Lyra' ]: { activeDialog: 'postRegisterTutorial' },
-            [ 'Arissa' ]: { activeDialog: 'postRegisterTutorial' },
-            [ 'Abe' ]: { activeDialog: 'postRegisterTutorial' },
+        [ 'Nora' ]: { activeDialog: 'default' },
+        [ 'Lyra' ]: { activeDialog: 'postRegisterTutorial' },
+        [ 'Arissa' ]: { activeDialog: 'postRegisterTutorial' },
+        [ 'Abe' ]: { activeDialog: 'postRegisterTutorial' },
     }, { merge: true });
     await setDoc(doc(db, `${interaction.user.id}/PlayerInfo`), {
         [ 'xpBonus' ]: 0,

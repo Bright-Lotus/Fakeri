@@ -106,7 +106,6 @@ module.exports = {
                                         .setTitle('Nora')
                                         .setColor(Colors.NoraColor)
                                         .setDescription(buyResponses[ Math.floor(Math.random() * buyResponses.length) ]);
-
                                     const dialogEnd = new ActionRowBuilder().addComponents(
                                         new ButtonBuilder()
                                             .setCustomId('end')
@@ -124,8 +123,14 @@ module.exports = {
                                     const docSnap = await getDoc(doc(db, collected.first().author.id, 'PlayerInfo/Inventory/Equipment'));
                                     let itemAmount;
                                     if (docSnap.exists()) {
-                                        itemAmount = docSnap.data()?.[ `${category}` ].amount;
+                                        if (!docSnap?.data()?.[ `${category}` ]) {
+                                            await updateDoc(doc(db, collected.first().author.id, 'PlayerInfo/Inventory/Equipment'), {
+                                                [ category ]: { amount: 0 },
+                                            }, { merge: true });
+                                        }
+                                        itemAmount = docSnap.data()[ `${category}` ]?.amount || 0;
                                     }
+                                    console.log(itemAmount);
 
                                     item = { ...item, id: itemAmount + 1 };
                                     if (category == 'consumables') {

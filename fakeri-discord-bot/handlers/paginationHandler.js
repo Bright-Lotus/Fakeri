@@ -77,7 +77,7 @@ async function pagination(category, objects, page, user, args) {
         if (page != 1) {
             for (let ignore = 1; ignore < page; ignore++) {
                 console.log('Adding +3');
-                currentItem += 3;
+                currentItem += (category != 'leaderboard') ? 3 : 5;
             }
         }
         for (let i = 0; i < maxItemsInPage; i++) {
@@ -378,8 +378,8 @@ async function pagination(category, objects, page, user, args) {
 
                     embed.addFields(
                         {
-                            name: `${currentItem + 1}) = ${bold(element.name)}`,
-                            value: `Puntos: **${new Intl.NumberFormat().format(element.eventPts)}**\nPuedes usar ${chatInputApplicationCommandMention('profile', CommandIds.Profile)} para ver informacion detallada`,
+                            name: `${currentItem + 1} \\ ${bold(element.name)} ${element.isPlayer ? '(Tú)' : ''} - ${chatInputApplicationCommandMention('profile', CommandIds.Profile)}`,
+                            value: `Puntos: **${new Intl.NumberFormat().format(element.eventPts)}**\nNivel: **${element.lvl}**\nVida: **${element.playerHp}/${element.playerMaxHp}** ${Utils.HpEmoji(element.playerHp, element.playerMaxHp)}`,
                         },
                     );
 

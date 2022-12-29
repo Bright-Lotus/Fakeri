@@ -24,7 +24,8 @@ module.exports = {
                     .setEmoji('➡️')
                     .setDisabled(true),
             );
-        await interaction.update({ components: [row] });
-        dialogHandler(dialogName, (Number(dialogStep.charAt(4)) + 1), interaction, optionChoosen.charAt(6), category);
+        await interaction.update({ components: [ row ] });
+        console.log(dialogStep.match(/\d+/g), (Number(dialogStep.charAt(4)) + 1), 'dialogdebug');
+        dialogHandler(dialogName, (Number(dialogStep.match(/\d+/g)[0]) + 1), interaction, optionChoosen.charAt(6), category);
     },
 };

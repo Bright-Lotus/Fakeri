@@ -1,4 +1,6 @@
+const { chatInputApplicationCommandMention } = require('discord.js');
 const { Colors } = require('../../../emums/colors');
+const { CommandIds } = require('../../../emums/commandIds');
 const { Icons } = require('../../../emums/icons');
 
 // IMPORTANT
@@ -129,7 +131,7 @@ module.exports = {
         step10option1: {
             name: '???',
             msgColor: Colors.NoraColor,
-            message: 'Mira algun item que puedas comprar y compralo!\nLos items de principiante son buenos para que empieces.\nPor ahora solo te digo eso, puedes usar /train para empezar de verdad tu camino.',
+            message: `Mira algun item que puedas comprar y compralo!\nLos items de principiante son buenos para que empieces.\nPor ahora solo te digo eso, puedes usar ${chatInputApplicationCommandMention('training', CommandIds.Training)} para empezar de verdad tu camino.`,
             specialFunction: {
                 name: 'openShop',
             },

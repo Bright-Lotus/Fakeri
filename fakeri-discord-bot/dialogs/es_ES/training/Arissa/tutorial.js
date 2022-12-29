@@ -1,4 +1,6 @@
+const { chatInputApplicationCommandMention } = require('discord.js');
 const { Colors } = require('../../../../emums/colors');
+const { CommandIds } = require('../../../../emums/commandIds');
 const { Icons } = require('../../../../emums/icons');
 
 module.exports = {
@@ -61,7 +63,7 @@ module.exports = {
         },
         step5option1: {
             name: 'Arissa',
-            message: '¡¡¡Si necesitas ayuda solo ven a mi!!!',
+            message: `¡¡¡Si necesitas ayuda solo ven a mi!!!\n\n***Usa ${chatInputApplicationCommandMention('training', CommandIds.Training)} para hablar con Arissa de nuevo***`,
             msgColor: '#FF0000',
             specialFunction: {
                 name: 'giveQuest',

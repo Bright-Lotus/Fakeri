@@ -44,10 +44,14 @@ module.exports = {
                     emoji: Icons.NextBtn,
                 },
             },
+            specialFunction: {
+                name: 'setActiveDialog',
+                target: 'Nora/postEliteTutorial',
+            },
         },
         step5option1: {
             name: 'Abe',
-            message: 'Estos tambien tienen alta cantidad de recompensas...\nTe dejo una nueva mision',
+            message: 'Estos tambien tienen alta cantidad de recompensas...\nTe dejo una nueva mision, tambien habla con Nora, dijo que queria hablar contigo',
             options: {
                 option1: {
                     text: 'Siguiente',

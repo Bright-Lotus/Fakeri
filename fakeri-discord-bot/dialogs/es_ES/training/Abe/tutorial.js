@@ -1,4 +1,6 @@
+const { chatInputApplicationCommandMention } = require('discord.js');
 const { Colors } = require('../../../../emums/colors');
+const { CommandIds } = require('../../../../emums/commandIds');
 const { Icons } = require('../../../../emums/icons');
 
 module.exports = {
@@ -55,7 +57,7 @@ module.exports = {
         },
         step4option2: {
             name: 'Abe',
-            message: 'Asi me gusta',
+            message: `Asi me gusta\n\n***Usa ${chatInputApplicationCommandMention('training', CommandIds.Training)} para hablar con Abe de nuevo***`,
             options: {
                 option1: {
                     text: 'Ya mismo',

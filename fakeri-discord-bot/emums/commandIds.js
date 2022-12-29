@@ -9,6 +9,7 @@ const CommandIds = Object.freeze({
     Shop: '1039145441163489280',
 	Profile: '1047102570960797697',
 	Event: '1047105371052982282',
+	Training: '1055934543829401623',
 });
 
 module.exports = { CommandIds };

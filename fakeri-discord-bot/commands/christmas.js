@@ -31,17 +31,17 @@ module.exports = {
                         .addChoices(
                             { name: 'Week 1', value: 'Week 1' },
                             { name: 'Week 2', value: 'Week 2' },
-                            { name: 'Milestones', value: 'Milestones' },
+                            // { name: 'Milestones', value: 'Milestones' },
                             { name: 'Instructor', value: 'Instructor' },
                             { name: 'Nora', value: 'Nora' },
                         ),
                 )
                 .addStringOption(option => option.setName('arguments').setDescription('Additional arguments.'));
         }),
-    execute: async function(interaction) {
+    execute: async function (interaction) {
         await event(interaction);
     },
-    contextMenuExecute: async function(interaction, selected) {
+    contextMenuExecute: async function (interaction, selected) {
         const playerClass = await (await getDoc(doc(db, interaction.user.id, 'PlayerInfo'))).data().class;
         let instructor;
         switch (playerClass) {
@@ -101,9 +101,17 @@ async function leaderboard(interaction) {
     const usersArray = [];
     if (players.exists()) {
         for await (const player of players.data().members) {
-            const eventPts = await (await getDoc(doc(db, player.id, 'PlayerInfo'))).data().eventPoints;
+            const playerInfo = await (await getDoc(doc(db, player.id, 'PlayerInfo'))).data();
             await interaction.client.users.fetch(player.id).then(usr => {
-                usersArray.push({ id: usr.id, eventPts: eventPts, name: usr.username });
+                usersArray.push({
+                    id: usr.id,
+                    eventPts: playerInfo.eventPoints,
+                    name: usr.username,
+                    playerHp: playerInfo.stats.hp,
+                    playerMaxHp: playerInfo.stats.maxHp,
+                    isPlayer: (interaction.user.id == player.id),
+                    lvl: playerInfo.playerLvl,
+                });
             });
         }
         const sortedArray = usersArray.sort((a, b) => {

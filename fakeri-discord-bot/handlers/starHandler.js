@@ -7,6 +7,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 async function starManager(action, amount, user) {
+    amount = Number(amount);
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve) => {
         if (action == 'give') {

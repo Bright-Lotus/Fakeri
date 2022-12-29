@@ -105,6 +105,34 @@ module.exports = {
             }
             return;
         }
+        if (interaction.customId.includes('leaderboardModal')) {
+            const players = await getDoc(doc(db, 'Event/Players'));
+            const usersArray = [];
+            if (players.exists()) {
+                for await (const player of players.data().members) {
+                    const playerInfo = await (await getDoc(doc(db, player.id, 'PlayerInfo'))).data();
+                    await interaction.client.users.fetch(player.id).then(usr => {
+                        usersArray.push({
+                            id: usr.id,
+                            eventPts: playerInfo.eventPoints,
+                            name: usr.username,
+                            playerHp: playerInfo.stats.hp,
+                            playerMaxHp: playerInfo.stats.maxHp,
+                            isPlayer: (interaction.user.id == player.id),
+                            lvl: playerInfo.playerLvl,
+                        });
+                    });
+                }
+                const sortedArray = usersArray.sort((a, b) => {
+                    return b.eventPts - a.eventPts;
+                });
+                console.log(sortedArray);
+                await pagination('leaderboard', sortedArray, interaction.customId.split('-')[1].charAt(4), interaction.user, { arraySorted: true }).then(results => {
+                    interaction.update({ embeds: [ results.embed ], components: [ results.paginationRow ] });
+                });
+                return;
+            }
+        }
         if (!interaction.customId.includes('shopModal') || interaction.customId.includes('pageViewer')) return;
         const page = interaction.customId.split('-')[ 1 ];
         const category = interaction.customId.split('-')[ 2 ];

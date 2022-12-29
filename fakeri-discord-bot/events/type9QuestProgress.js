@@ -21,10 +21,10 @@ module.exports = {
                 if (!docSnap.id.includes('Quests')) return;
                 const week = docSnap.id.substring(6);
 
-                if (!docSnap.data()?.quest1) return;
+                if (!docSnap.data()?.quest0) return;
                 for (let i = 1; i < 6; i++) {
 
-                    const mission = docSnap.data()[ `quest${i}` ];
+                    const mission = docSnap.data()[ `quest${(index == 1) ? i - 1 : i}` ];
                     /* Quest Types:
                     1 = Send Message | DONE
                     2 = React with emoji to messages | DONE
@@ -40,9 +40,9 @@ module.exports = {
                     if (mission?.type == 9) {
                         querySnapshot.forEach(async (document) => {
                             if (document.id == 'Milestones' || document.id != week) return;
-                            let current = document.data()[ `mission${i}` ];
-                            const missionGoal = docSnap.data()[ `quest${i}` ].goal;
-                            const quest = docSnap.data()[ `quest${i}` ];
+                            let current = document.data()[ `mission${(index == 1) ? i - 1 : i}` ];
+                            const missionGoal = docSnap.data()[ `quest${(index == 1) ? i - 1 : i}` ].goal;
+                            const quest = docSnap.data()[ `quest${(index == 1) ? i - 1 : i}` ];
 
                             if (current >= missionGoal) {
                                 console.log('Goal reached');

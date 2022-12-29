@@ -2,8 +2,8 @@ const { goldManager } = require('../handlers/goldHandler.js');
 const { getFirestore, doc, updateDoc, getDocs, collection, increment } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
 const { firebaseConfig } = require('../firebaseConfig.js');
-const { EmbedBuilder } = require('@discordjs/builders');
 const { starManager } = require('../handlers/starHandler.js');
+const { EmbedBuilder } = require('discord.js');
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -28,15 +28,15 @@ module.exports = {
                             }, { merge: true });
                             const completedInstructorEmbed = new EmbedBuilder()
                                 .setTitle(`Has completado una mision de ${week}!`)
-                                .setColor('Green')
+                                .setColor('#00FF48')
                                 .setDescription(`Habla con ${week} de nuevo!`);
                             user.send({ embeds: [completedInstructorEmbed] });
                         }
                     }
                 }
-                await goldManager('give', mission.rewards.gold, user);
-                await starManager('give', mission.rewards.stars, user);
-                await updateDoc(doc(db, `${user.id}/PlayerInfo`), { ['xpBonus']: increment(mission.rewards.xpBonus) }, { merge: true });
+                await goldManager('give', Number(mission.rewards.gold), user);
+                await starManager('give', Number(mission.rewards.stars), user);
+                await updateDoc(doc(db, `${user.id}/PlayerInfo`), { ['xpBonus']: increment(Number(mission.rewards.xpBonus)) }, { merge: true });
                 return;
             }
             let current = document.data().mission0;
@@ -50,7 +50,7 @@ module.exports = {
             }
             await updateDoc(doc(db, `${user.id}/EventQuestProgression/Weekly/${week}`), { ['mission0']: increment(1) }, { merge: true });
         });
-        await goldManager('give', mission.rewards.gold, user);
-        await updateDoc(doc(db, `${user.id}/PlayerInfo`), { ['xpBonus']: increment(mission.rewards.xpBonus) }, { merge: true });
+        await goldManager('give', Number(mission.rewards.gold), user);
+        await updateDoc(doc(db, `${user.id}/PlayerInfo`), { ['xpBonus']: increment(Number(mission.rewards.xpBonus)) }, { merge: true });
     },
 };

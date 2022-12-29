@@ -47,9 +47,9 @@ async function attack(user, enemy, client, farmChannel) {
                 }
 
                 for await (const bonus of farmChannel?.zoneBonuses || []) {
-                    const bonusAmount = bonus.amount.split('%')[ 0 ];
+                    const bonusAmount = Number(bonus.amount.match(/\d+/g));
                     await updateDoc(doc(db, user.id, 'PlayerInfo'), {
-                        [ `stats.${bonus.type}` ]: increment(playerInfo.data().stats[ farmChannel.zoneBonuses.type ] / 100 * bonusAmount),
+                        [ `stats.${bonus.type}` ]: increment(Number(playerInfo.data().stats[ bonus.type ] / 100 * bonusAmount)),
                     }, { merge: true });
                 }
                 let finalDamage = (Math.sign(playerAtk - enemyArmor) == -1) ? 0 : playerAtk - enemyArmor;
@@ -139,9 +139,9 @@ async function attack(user, enemy, client, farmChannel) {
                             [ `battles.battle${enemy}` ]: finalEnemy,
                         }, { merge: true });
                         for await (const bonus of farmChannel?.zoneBonuses || []) {
-                            const bonusAmount = bonus.amount.split('%')[ 0 ];
+                            const bonusAmount = Number(bonus.amount.match(/\d+/g)[0]);
                             await updateDoc(doc(db, user.id, 'PlayerInfo'), {
-                                [ `stats.${bonus.type}` ]: increment(-(bonusAmount)),
+                                [ `stats.${bonus.type}` ]: increment(-(playerInfo.data().stats[ bonus.type ] / 100 * bonusAmount)),
                             }, { merge: true });
                         }
                         return resolve({ enemyAttacked: true, damageReceived: 0, remainingHp: playerInfo.data().stats.hp });
@@ -156,10 +156,10 @@ async function attack(user, enemy, client, farmChannel) {
                         remainingHp = results.remainingHp;
                     });
                     if (dead) {
-                        for await (const bonus of farmChannel.zoneBonuses) {
-                            const bonusAmount = bonus.amount.split('%')[ 0 ];
+                        for await (const bonus of farmChannel?.zoneBonuses || []) {
+                            const bonusAmount = Number(bonus.amount.match(/\d+/g)[0]);
                             await updateDoc(doc(db, user.id, 'PlayerInfo'), {
-                                [ `stats.${bonus.type}` ]: increment(-(bonusAmount)),
+                                [ `stats.${bonus.type}` ]: increment(-Math.abs((playerInfo.data().stats[ bonus.type ] / 100 * bonusAmount))),
                             }, { merge: true });
                         }
                         return reject({ damageReceived: enemyDmg, remainingHp: `0 / **${playerInfo.data().stats.maxHp}** ${Utils.HpEmoji(0, playerInfo.data().stats.maxHp)}` });
@@ -212,9 +212,9 @@ async function attack(user, enemy, client, farmChannel) {
                         [ `battles.battle${enemy}` ]: finalEnemy,
                     }, { merge: true });
                     for await (const bonus of farmChannel?.zoneBonuses || []) {
-                        const bonusAmount = bonus.amount.split('%')[ 0 ];
+                        const bonusAmount = Number(bonus.amount.match(/\d+/g)[0]);
                         await updateDoc(doc(db, user.id, 'PlayerInfo'), {
-                            [ `stats.${bonus.type}` ]: increment(-(bonusAmount)),
+                            [ `stats.${bonus.type}` ]: increment(-Math.abs((playerInfo.data().stats[ bonus.type ] / 100 * bonusAmount))),
                         }, { merge: true });
                     }
                     return resolve({ enemyAttacked: true, damageReceived: `${enemyDmg} ${emojisBonusDmg}`, remainingHp: `${remainingHp} / **${playerInfo.data().stats.maxHp}** ${Utils.HpEmoji(remainingHp, playerInfo.data().stats.maxHp)} ${lifesteal}` });
@@ -393,7 +393,7 @@ async function attack(user, enemy, client, farmChannel) {
                 if (Math.sign(finalDamage) == -1) finalDamage = 0;
                 // Attack the enemy
                 finalEnemy.enemyHp -= finalDamage;
-                if (!playerInfo.attackOnCooldown && false) {
+                if (!playerInfo.attackOnCooldown) {
                     const attackCooldown = 40;
                     const reducedAttackCdValue = attackCooldown / (1 + (playerInfo.data().stats.speed / 100));
                     await updateDoc(doc(db, user.id, 'PlayerInfo'), {
@@ -411,8 +411,10 @@ async function attack(user, enemy, client, farmChannel) {
                 finalEnemy.turn = (finalEnemy.turn == 'player') ? 'enemy' : 'player';
                 console.log(finalEnemy, 'debugattackenemy');
                 if (finalEnemy.enemyHp <= 0) {
-                    await xpManager('give', enemyXp, user).then(console.log);
-                    await goldManager('give', enemyGold, user);
+                    client.emit('type8QuestProgress', user, client);
+
+                    await xpManager('give', Number(enemyXp), user).then(console.log);
+                    await goldManager('give', Number(enemyGold), user);
                     await updateDoc(doc(db, user.id, 'ActiveBattles'), {
                         [ `battles.battle${enemy}` ]: deleteField(),
                     }, { merge: true });
@@ -430,18 +432,17 @@ async function attack(user, enemy, client, farmChannel) {
                         }));
 
                         for await (const bonus of farmChannel?.zoneBonuses || []) {
-                            const bonusAmount = bonus.amount.split('%')[ 0 ];
+                            const bonusAmount = Number(bonus.amount.match(/\d+/g)[0]);
                             await updateDoc(doc(db, user.id, 'PlayerInfo'), {
-                                [ `stats.${bonus.type}` ]: increment(-(bonusAmount)),
+                                [ `stats.${bonus.type}` ]: increment(-Math.abs((playerInfo.data().stats[ bonus.type ] / 100 * bonusAmount))),
                             }, { merge: true });
                         }
                         if (resolveResults?.enemyKilled) return resolve(resolveResults);
                     }
-                    client.emit('type8QuestProgress', user, client);
                     for await (const bonus of farmChannel?.zoneBonuses || []) {
-                        const bonusAmount = bonus.amount.split('%')[ 0 ];
+                        const bonusAmount = Number(bonus.amount.match(/\d+/g)[0]);
                         await updateDoc(doc(db, user.id, 'PlayerInfo'), {
-                            [ `stats.${bonus.type}` ]: increment(-(bonusAmount)),
+                            [ `stats.${bonus.type}` ]: increment(-Math.abs((playerInfo.data().stats[ bonus.type ] / 100 * bonusAmount))),
                         }, { merge: true });
                     }
                     return resolve({ enemyKilled: true, xp: Math.round((enemyXp / 100) * (playerInfo.data().xpBonus + 100)), gold: enemyGold, damageDone: `${(emojisDmg.trim() == '') ? finalDamage : bold(finalDamage)} ${emojisDmg}` });
@@ -451,11 +452,10 @@ async function attack(user, enemy, client, farmChannel) {
                 await updateDoc(doc(db, user.id, 'ActiveBattles'), {
                     [ `battles.battle${enemy}` ]: finalEnemy,
                 }, { merge: true });
-                client.emit('type8QuestProgress', user, client);
                 for await (const bonus of farmChannel?.zoneBonuses || []) {
-                    const bonusAmount = bonus.amount.split('%')[ 0 ];
+                    const bonusAmount = Number(bonus.amount.match(/\d+/g)[0]);
                     await updateDoc(doc(db, user.id, 'PlayerInfo'), {
-                        [ `stats.${bonus.type}` ]: increment(-(bonusAmount)),
+                        [ `stats.${bonus.type}` ]: increment(-Math.abs((playerInfo.data().stats[ bonus.type ] / 100 * bonusAmount))),
                     }, { merge: true });
                 }
                 return resolve({ damageDone: `${(emojisDmg.trim() == '') ? finalDamage : bold(finalDamage)} ${emojisDmg}`, enemyHpRemaining: `${finalEnemy.enemyHp} / **${finalEnemy.enemyMaxHp}** ${Utils.HpEmoji(finalEnemy.enemyHp, finalEnemy.enemyMaxHp)}` });
