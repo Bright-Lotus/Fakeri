@@ -4,7 +4,7 @@ const sizeOf = require('image-size');
 
 const { firebaseConfig } = require('../firebaseConfig.js');
 
-const { getFirestore, collection, getDocs, Timestamp, getDoc, doc } = require('firebase/firestore');
+const { getFirestore, collection, getDocs, Timestamp, getDoc, doc, orderBy, query } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
 const { pagination } = require('../handlers/paginationHandler.js');
 const path = require('node:path');
@@ -312,8 +312,8 @@ async function quests(interaction, weekToDisplay, selectMenu) {
     context.textAlign = 'start';
     let weekUnlocked = true;
     let attachment;
-    const query = (weekToDisplay.includes('Week')) ? '/Event' : interaction.user.id;
-    const weeklyQuestsSnap = await getDocs(collection(db, query));
+    const missionsQuery = query(collection(db, (weekToDisplay.includes('Week')) ? '/Event' : interaction.user.id), orderBy('quest0'));
+    const weeklyQuestsSnap = await getDocs(missionsQuery);
     userWeeklys.forEach(async (weekly) => {
         if (weekToDisplay.includes('Week')) {
             if (!weekly.id.includes(weekToDisplay.split(' ')[ 1 ])) {
@@ -536,7 +536,7 @@ async function questImage(userID, category) {
     const weeklyQuestsSnap = await getDocs(collection(db, '/Event'));
 
     let imgStr = 'assets/questUI/completed/Week1/questUI_missions_completed_';
-    const completedArray = [];
+    let completedArray = [];
     switch (category) {
         case 'Week 1':
             querySnapshot.forEach(async userMissions => {
@@ -558,6 +558,7 @@ async function questImage(userID, category) {
                     }
                 }
             }
+            completedArray = completedArray.filter(item => item !== '0');
             console.log(completedArray);
             completedArray.forEach(element => {
                 imgStr += element.toString();

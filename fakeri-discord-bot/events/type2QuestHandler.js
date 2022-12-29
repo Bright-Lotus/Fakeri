@@ -1,4 +1,4 @@
-const { getFirestore, doc, setDoc, getDocs, collection } = require('firebase/firestore');
+const { getFirestore, doc, setDoc, getDocs, collection, orderBy, query } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
 const { firebaseConfig } = require('../firebaseConfig.js');
 const { EmbedBuilder, chatInputApplicationCommandMention } = require('discord.js');
@@ -30,7 +30,8 @@ module.exports = {
         // The reaction is now also fully available and the properties will be reflected accurately:
         console.log(`${reaction.count} user(s) have given the same reaction to this message!`);
 
-        const weeklyQuestsSnap = await getDocs(collection(db, '/Event'));
+        const missionsQuery = query(collection(db, '/Event'), orderBy('quest0'));
+        const weeklyQuestsSnap = await getDocs(missionsQuery);
         weeklyQuestsSnap.forEach(async (docSnap) => {
             if (!docSnap.id.includes('QuestsWeek')) return;
             const week = docSnap.id.substring(6);

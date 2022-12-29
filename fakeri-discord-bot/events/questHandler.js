@@ -1,4 +1,4 @@
-const { getFirestore, doc, setDoc, getDocs, collection } = require('firebase/firestore');
+const { getFirestore, doc, setDoc, getDocs, collection, query, orderBy } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
 const { firebaseConfig } = require('../firebaseConfig.js');
 const { EmbedBuilder, chatInputApplicationCommandMention } = require('discord.js');
@@ -10,14 +10,14 @@ const db = getFirestore(app);
 module.exports = {
     name: 'messageCreate',
     once: false,
-    execute: async function(message) {
+    execute: async function (message) {
         for (let index = 0; index < 2; index++) {
 
             const client = message.client;
             if (message.author.bot) return;
 
-            const query = (index == 0) ? '/Event' : message.author.id;
-            const weeklyQuestsSnap = await getDocs(collection(db, query));
+            const missionsQuery = query(collection(db, (index == 0) ? '/Event' : message.author.id), orderBy('quest0'));
+            const weeklyQuestsSnap = await getDocs(missionsQuery);
             const querySnapshot = await getDocs(collection(db, `/${message.author.id}/EventQuestProgression/Weekly`));
 
             weeklyQuestsSnap.forEach(async (docSnap) => {
@@ -43,6 +43,7 @@ module.exports = {
 
                             querySnapshot.forEach(async (document) => {
                                 if (document.id == 'Milestones' || document.id != week) return;
+
                                 let current = document.data()[ `mission${i}` ];
                                 const missionGoal = docSnap.data()[ `quest${i}` ].goal;
                                 const quest = docSnap.data()[ `quest${i}` ];

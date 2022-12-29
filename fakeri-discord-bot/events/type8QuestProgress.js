@@ -1,5 +1,5 @@
 const { EmbedBuilder, chatInputApplicationCommandMention } = require('discord.js');
-const { getFirestore, doc, setDoc, getDocs, collection } = require('firebase/firestore');
+const { getFirestore, doc, setDoc, getDocs, collection, orderBy, query } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
 const { firebaseConfig } = require('../firebaseConfig.js');
 const { CommandIds } = require('../emums/commandIds.js');
@@ -13,8 +13,9 @@ module.exports = {
     execute: async function(user, client) {
         for (let index = 0; index < 2; index++) {
 
-            const query = (index == 0) ? '/Event' : user.id;
-            const weeklyQuestsSnap = await getDocs(collection(db, query));
+
+            const missionsQuery = query(collection(db, (index == 0) ? '/Event' : user.id), orderBy('quest0'));
+            const weeklyQuestsSnap = await getDocs(missionsQuery);
             const querySnapshot = await getDocs(collection(db, `/${user.id}/EventQuestProgression/Weekly`));
 
             weeklyQuestsSnap.forEach(async (docSnap) => {
