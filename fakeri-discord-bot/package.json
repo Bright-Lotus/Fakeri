@@ -24,7 +24,7 @@
     "ffprobe-static": "^3.1.0",
     "figlet": "^1.5.2",
     "firebase": "^9.9.4",
-    "firebase-admin": "^11.2.0",
+    "firebase-admin": "^11.4.1",
     "firebase-functions": "^4.0.1",
     "fluent-ffmpeg": "^2.1.2",
     "font-list": "^1.4.5",
