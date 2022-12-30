@@ -502,6 +502,13 @@ module.exports = {
                             .setColor('Red')
                             .setDescription(`No puedes hacer nada hasta que revivas.\n${bold('Reviviras en 8 mega-revers.')}`);
                         await interaction.user.send({ embeds: [ deadEmbed ] });
+                        await updateDoc(doc(db, 'Event/Timeouts'), {
+                            [ 'timestamps' ]: arrayUnion({
+                                timeoutDate: Timestamp.fromDate(new Date().setHours(new Date().getHours() + 4)),
+                                type: 'revive',
+                                dropChannel: interaction.user.id,
+                            }),
+                        }, { merge: true });
 
                         setTimeout(async (user, hpManager) => {
                             await hpManager('revive', user);
@@ -589,6 +596,13 @@ module.exports = {
                         .setColor('Red')
                         .setDescription(`No puedes hacer nada hasta que revivas.\n${bold('Reviviras en 8 mega-revers.')}`);
                     await interaction.user.send({ embeds: [ deadEmbed ] });
+                    await updateDoc(doc(db, 'Event/Timeouts'), {
+                        [ 'timestamps' ]: arrayUnion({
+                            timeoutDate: Timestamp.fromDate(new Date().setHours(new Date().getHours() + 4)),
+                            type: 'revive',
+                            dropChannel: interaction.user.id,
+                        }),
+                    }, { merge: true });
 
                     setTimeout(async (user, hpManager) => {
                         await hpManager('revive', user);
@@ -647,6 +661,13 @@ module.exports = {
                             .setColor('Red')
                             .setDescription(`No puedes hacer nada hasta que revivas.\n${bold('Reviviras en 8 mega-revers.')}`);
                         await interaction.user.send({ embeds: [ deadEmbed ] });
+                        await updateDoc(doc(db, 'Event/Timeouts'), {
+                            [ 'timestamps' ]: arrayUnion({
+                                timeoutDate: Timestamp.fromDate(new Date().setHours(new Date().getHours() + 4)),
+                                type: 'revive',
+                                dropChannel: interaction.user.id,
+                            }),
+                        }, { merge: true });
 
                         setTimeout(async (user, hpManager) => {
                             await hpManager('revive', user);
@@ -759,6 +780,13 @@ module.exports = {
                         .setColor('Red')
                         .setDescription(`No puedes hacer nada hasta que revivas.\n${bold('Reviviras en 8 mega-revers.')}`);
                     await interaction.user.send({ embeds: [ deadEmbed ] });
+                    await updateDoc(doc(db, 'Event/Timeouts'), {
+                        [ 'timestamps' ]: arrayUnion({
+                            timeoutDate: Timestamp.fromDate(new Date().setHours(new Date().getHours() + 4)),
+                            type: 'revive',
+                            dropChannel: interaction.user.id,
+                        }),
+                    }, { merge: true });
 
                     setTimeout(async (user, hpManager) => {
                         await hpManager('revive', user);

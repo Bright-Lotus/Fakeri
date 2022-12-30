@@ -14,9 +14,8 @@ const db = getFirestore(app);
 module.exports = {
     name: Events.MessageReactionAdd,
     once: false,
-    execute: async function (reaction, usr) {
+    execute: async function(reaction, usr) {
         // When a reaction is received, check if the structure is partial
-        console.log(reaction, 'logdebug');
         if (reaction.partial) {
             // If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
             try {
@@ -31,9 +30,7 @@ module.exports = {
 
         if (usr.bot) return;
         // Now the message has been cached and is fully available
-        console.log(`${reaction.message.author}'s message "${reaction.message.content}" gained a reaction!`);
         // The reaction is now also fully available and the properties will be reflected accurately:
-        console.log(`${reaction.count} user(s) have given the same reaction to this message!`);
         const channels = await getDoc(doc(db, 'Event/GiftDrops'));
         if (channels.exists()) {
 
@@ -46,7 +43,6 @@ module.exports = {
                 if (reaction.message.id == openMsg) {
                     if (reaction.emoji.name == '🎁' && activeDrop.opened) {
                         if (usr.bot) return;
-                        console.log(activeDrop.usersRewarded);
                         if (activeDrop.usersRewarded.some(member => member.includes(usr.id))) return;
 
                         const docSnap = await getDoc(doc(db, usr.id, 'PlayerInfo'));
@@ -54,7 +50,6 @@ module.exports = {
                             const xpBonus = docSnap.data().xpBonus;
                             const baseXp = 300;
                             const finalXp = baseXp + (baseXp * (xpBonus - activeDrop.multiplier));
-                            console.log(finalXp, 'log', xpBonus, baseXp);
 
                             const rewardEmbed = new EmbedBuilder()
                                 .setTitle('Gift Drop Rewards!')
@@ -83,11 +78,11 @@ module.exports = {
 
             for await (const msg of activeDrop.messages) {
                 if (reaction.message.id == msg) {
+                    console.log(`Reaction added to a gift drop message: ${usr.id} ${usr.tag}`);
                     await updateDoc(doc(db, 'Event/GiftDrops'), {
                         [ 'activeDrop.pendingRewards' ]: arrayUnion(usr.id),
                     }, { merge: true });
 
-                    console.log(activeDrop.pendingRewards.length + 1, 'gfsdgasg');
                     if (activeDrop.progress + 1 == activeDrop.goal) {
 
                         reaction.message.channel.sendTyping();
@@ -127,7 +122,6 @@ module.exports = {
                                         const xpBonus = playerInfo.data().xpBonus;
                                         const baseXp = 300;
                                         const finalXp = baseXp + (baseXp * xpBonus);
-                                        console.log(finalXp, 'log', xpBonus, baseXp);
 
 
                                         const rewardEmbed = new EmbedBuilder()

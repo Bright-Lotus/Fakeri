@@ -1,13 +1,12 @@
-const { getFirestore, Timestamp, doc, getDoc, updateDoc } = require('firebase/firestore');
-const { initializeApp } = require('firebase/app');
-const { firebaseConfig } = require('../firebaseConfig.js');
 const { AttachmentBuilder, EmbedBuilder, time, TimestampStyles } = require('discord.js');
 const { Colors } = require('../emums/colors.js');
 const path = require('node:path');
-
-
+const { getFirestore, Timestamp, doc, getDoc, updateDoc, arrayUnion } = require('firebase/firestore');
+const { initializeApp } = require('firebase/app');
+const { firebaseConfig } = require('../firebaseConfig.js');
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
 
 async function giftsDrop(client) {
     const timeoutArray = [];
@@ -155,6 +154,13 @@ async function giftsDrop(client) {
                         }, 36e5, dropChannel);
 
                     }, 36e5 * 5, dropsChannel);
+                    await updateDoc(doc(db, 'Event/Timeouts'), {
+                        [ 'timestamps' ]: arrayUnion({
+                            timeoutDate: Timestamp.fromDate(new Date().setHours(new Date().getHours() + 5)),
+                            type: 'giftDestruction',
+                            dropChannel: giftDropsChannel.id,
+                        }),
+                    }, { merge: true });
                 }, Math.abs(diffDay), giftDropsChannel);
 
                 timeoutArray.push(timeout1, timeout2, timeout3);
