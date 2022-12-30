@@ -107,46 +107,45 @@ module.exports = {
                                     [ 'activeDrop.openMsgs' ]: arrayUnion(message.id),
                                 }, { merge: true });
 
-                                setInterval(async () => {
-                                    await updateDoc(doc(db, 'Event/GiftDrops'), {
-                                        [ 'activeDrop.multiplier' ]: increment(0.05),
-                                    }, { merge: true });
-                                }, 36e5);
-
                                 message.react('🎁');
-                                const users = (await getDoc(doc(db, 'Event/GiftDrops'))).data().activeDrop.pendingRewards || [];
-                                users.forEach(async userID => {
-                                    const playerInfo = await getDoc(doc(db, userID, 'PlayerInfo'));
-                                    const user = await reaction.client.users.fetch(userID);
-                                    if (playerInfo.exists()) {
-                                        const xpBonus = playerInfo.data().xpBonus;
-                                        const baseXp = 300;
-                                        const finalXp = baseXp + (baseXp * xpBonus);
-
-
-                                        const rewardEmbed = new EmbedBuilder()
-                                            .setTitle('Gift Drop Rewards!')
-                                            .setDescription('Thanks for helping open the gift, here are your rewards:')
-                                            .setColor(Colors[ Utils.CapitalizeFirstLetter(activeDrop.giftColor) ])
-                                            .addFields(
-                                                { name: underscore('XP'), value: `${finalXp} XP (XP Bonus applied)` },
-                                                { name: underscore('Gold'), value: '50 GOLD' },
-                                            );
-                                        user.send({ embeds: [ rewardEmbed ] });
-
-                                        xpManager('give', baseXp, user);
-                                        goldManager('give', 50, user);
-
-                                        reaction.client.emit('type7QuestProgress', usr, reaction.client);
-
-                                        rewarded.push(userID);
-                                        await updateDoc(doc(db, 'Event/GiftDrops'), {
-                                            [ 'activeDrop.usersRewarded' ]: rewarded,
-                                        }, { merge: true });
-                                    }
-                                });
                             });
                         }
+                        setInterval(async () => {
+                            await updateDoc(doc(db, 'Event/GiftDrops'), {
+                                [ 'activeDrop.multiplier' ]: increment(0.05),
+                            }, { merge: true });
+                        }, 36e5);
+                        const users = (await getDoc(doc(db, 'Event/GiftDrops'))).data().activeDrop.pendingRewards || [];
+                        users.forEach(async userID => {
+                            const playerInfo = await getDoc(doc(db, userID, 'PlayerInfo'));
+                            const user = await reaction.client.users.fetch(userID);
+                            if (playerInfo.exists()) {
+                                const xpBonus = playerInfo.data().xpBonus;
+                                const baseXp = 300;
+                                const finalXp = baseXp + (baseXp * xpBonus);
+
+
+                                const rewardEmbed = new EmbedBuilder()
+                                    .setTitle('Gift Drop Rewards!')
+                                    .setDescription('Thanks for helping open the gift, here are your rewards:')
+                                    .setColor(Colors[ Utils.CapitalizeFirstLetter(activeDrop.giftColor) ])
+                                    .addFields(
+                                        { name: underscore('XP'), value: `${finalXp} XP (XP Bonus applied)` },
+                                        { name: underscore('Gold'), value: '50 GOLD' },
+                                    );
+                                user.send({ embeds: [ rewardEmbed ] });
+
+                                xpManager('give', baseXp, user);
+                                goldManager('give', 50, user);
+
+                                reaction.client.emit('type7QuestProgress', usr, reaction.client);
+
+                                rewarded.push(userID);
+                                await updateDoc(doc(db, 'Event/GiftDrops'), {
+                                    [ 'activeDrop.usersRewarded' ]: rewarded,
+                                }, { merge: true });
+                            }
+                        });
 
                         await updateDoc(doc(db, 'Event/GiftDrops'), {
                             [ 'activeDrop.opened' ]: true,

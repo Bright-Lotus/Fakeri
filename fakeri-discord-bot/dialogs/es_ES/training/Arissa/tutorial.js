@@ -47,7 +47,7 @@ module.exports = {
                 },
             },
         },
-        step4option2: {
+        step5option1: {
             name: 'Arissa',
             message: '¡¡Maravilloso!!',
             options: {
@@ -61,7 +61,7 @@ module.exports = {
                 target: 'Arissa/attackHelpDialog',
             },
         },
-        step5option1: {
+        step6option1: {
             name: 'Arissa',
             message: `¡¡¡Si necesitas ayuda solo ven a mi!!!\n\n***Usa ${chatInputApplicationCommandMention('training', CommandIds.Training)} para hablar con Arissa de nuevo***`,
             msgColor: '#FF0000',
