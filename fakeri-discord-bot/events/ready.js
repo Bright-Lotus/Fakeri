@@ -2,6 +2,7 @@ const { giftsDrop } = require('../handlers/dropHandler');
 const figlet = require('figlet');
 const chalk = require('chalk');
 const { ActivityType } = require('discord.js');
+const { timeoutManager } = require('../handlers/timeoutsHandler');
 
 module.exports = {
 	name: 'ready',
@@ -55,6 +56,7 @@ module.exports = {
 			bot.user.setPresence({ activities: [ statuses[ Math.floor(Math.random() * statuses.length) ] ] });
 		}, 18e5, client, botStatuses);
 		await giftsDrop(client);
+		await timeoutManager(client);
 		setInterval(async (botClient) => {
 			await giftsDrop(botClient);
 		}, (36e5 * 24), client);
