@@ -9,7 +9,7 @@ const db = getFirestore(app);
 async function timeoutManager(client) {
     const timeoutsSnap = await getDoc(doc(db, 'Event/Timeouts'));
     if (timeoutsSnap.exists()) {
-        const timeouts = timeoutsSnap.data().dates;
+        const timeouts = timeoutsSnap.data().timestamps;
         for await (const timeout of timeouts) {
             const timeoutDate = new Timestamp(timeout.timeoutDate.seconds, timeout.timeoutDate.nanoseconds).toDate();
             const diff = (+Date.now()) - (+timeoutDate);
@@ -34,7 +34,7 @@ async function timeoutManager(client) {
                                     timeoutDate: Timestamp.fromMillis(originalTimestamp),
                                 }),
                             }, { merge: true });
-                        }, diff, user, healthManager, EmbedBuilder, timeoutDate);
+                        }, Math.abs(diff), user, healthManager, EmbedBuilder, timeoutDate);
                     });
                     return;
                 }
