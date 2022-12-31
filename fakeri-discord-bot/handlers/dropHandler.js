@@ -156,7 +156,7 @@ async function giftsDrop(client) {
                     }, 36e5 * 5, dropsChannel);
                     await updateDoc(doc(db, 'Event/Timeouts'), {
                         [ 'timestamps' ]: arrayUnion({
-                            timeoutDate: Timestamp.fromDate(new Date().setHours(new Date().getHours() + 5)),
+                            timeoutDate: Timestamp.fromMillis(new Date().setHours(new Date().getHours() + 5)),
                             type: 'giftDestruction',
                             dropChannel: giftDropsChannel.id,
                         }),

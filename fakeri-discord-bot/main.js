@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, Collection, Partials, EmbedBuilder, TimestampStyles, time, codeBlock, userMention, Status, PresenceUpdateStatus, ClientPresence, ActivityType } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, Partials, EmbedBuilder, TimestampStyles, time, codeBlock, userMention } = require('discord.js');
 const fs = require('node:fs');
 const path = require('node:path');
 

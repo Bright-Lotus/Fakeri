@@ -120,13 +120,13 @@ module.exports = {
             if (!playerInfo.exists() && message.content == 'attack') {
                 return message.reply({ embeds: [ ErrorEmbed(EventErrors.PlayerNotRegistered) ] });
             }
-            if (playerInfo.data()?.dead) {
-                return message.reply({ embeds: [ ErrorEmbed(EventErrors.PlayerIsDead) ] });
-            }
 
             switch (message.content) {
                 case 'attack':
                     message.channel.sendTyping();
+                    if (playerInfo.data()?.dead) {
+                        return message.reply({ embeds: [ ErrorEmbed(EventErrors.PlayerIsDead) ] });
+                    }
 
                     farmChannels.forEach(async farmChannel => {
                         const constant = 0.1;
@@ -331,6 +331,9 @@ module.exports = {
                 case 'ability': {
                     if (playerInfo.data().class != 'enchanter') return;
                     message.channel.sendTyping();
+                    if (playerInfo.data()?.dead) {
+                        return message.reply({ embeds: [ ErrorEmbed(EventErrors.PlayerIsDead) ] });
+                    }
 
                     const playerEquipment = await getDoc(doc(db, message.author.id, 'PlayerInfo/Inventory/Equipment'));
                     if (playerEquipment.exists()) {
@@ -372,6 +375,9 @@ module.exports = {
                 case 'charge':
                     if (playerInfo.data().class != 'warrior') return;
                     message.channel.sendTyping();
+                    if (playerInfo.data()?.dead) {
+                        return message.reply({ embeds: [ ErrorEmbed(EventErrors.PlayerIsDead) ] });
+                    }
 
                     if (activeBattles.exists()) {
 

@@ -504,9 +504,9 @@ module.exports = {
                         await interaction.user.send({ embeds: [ deadEmbed ] });
                         await updateDoc(doc(db, 'Event/Timeouts'), {
                             [ 'timestamps' ]: arrayUnion({
-                                timeoutDate: Timestamp.fromDate(new Date().setHours(new Date().getHours() + 4)),
+                                timeoutDate: Timestamp.fromMillis(new Date().setHours(new Date().getHours() + 4)),
                                 type: 'revive',
-                                dropChannel: interaction.user.id,
+                                target: interaction.user.id,
                             }),
                         }, { merge: true });
 
@@ -598,9 +598,9 @@ module.exports = {
                     await interaction.user.send({ embeds: [ deadEmbed ] });
                     await updateDoc(doc(db, 'Event/Timeouts'), {
                         [ 'timestamps' ]: arrayUnion({
-                            timeoutDate: Timestamp.fromDate(new Date().setHours(new Date().getHours() + 4)),
+                            timeoutDate: Timestamp.fromMillis(new Date().setHours(new Date().getHours() + 4)),
                             type: 'revive',
-                            dropChannel: interaction.user.id,
+                            target: interaction.user.id,
                         }),
                     }, { merge: true });
 
@@ -663,9 +663,9 @@ module.exports = {
                         await interaction.user.send({ embeds: [ deadEmbed ] });
                         await updateDoc(doc(db, 'Event/Timeouts'), {
                             [ 'timestamps' ]: arrayUnion({
-                                timeoutDate: Timestamp.fromDate(new Date().setHours(new Date().getHours() + 4)),
+                                timeoutDate: Timestamp.fromMillis(new Date().setHours(new Date().getHours() + 4)),
                                 type: 'revive',
-                                dropChannel: interaction.user.id,
+                                target: interaction.user.id,
                             }),
                         }, { merge: true });
 
@@ -782,9 +782,9 @@ module.exports = {
                     await interaction.user.send({ embeds: [ deadEmbed ] });
                     await updateDoc(doc(db, 'Event/Timeouts'), {
                         [ 'timestamps' ]: arrayUnion({
-                            timeoutDate: Timestamp.fromDate(new Date().setHours(new Date().getHours() + 4)),
+                            timeoutDate: Timestamp.fromMillis(new Date().setHours(new Date().getHours() + 4)),
                             type: 'revive',
-                            dropChannel: interaction.user.id,
+                            target: interaction.user.id,
                         }),
                     }, { merge: true });
 
