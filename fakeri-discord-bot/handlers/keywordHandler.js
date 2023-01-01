@@ -38,7 +38,7 @@ async function keywordHandler(keyword, keywordSubtype, enemy, user, args) {
                 };
                 for (const key in enemy) {
                     const property = enemy[ key ];
-                    if (key == 'enemyId' || key == 'turn' || key == 'enemyUnique' || key == 'keywords' || key == 'enemyHp' || key == 'enemyElite') continue;
+                    if (key == 'enemyId' || key == 'turn' || key == 'enemyUnique' || key == 'keywords' || key == 'enemyHp' || key == 'enemyElite' || key == 'debuffs') continue;
                     finalEnemy[ key ] = Math.floor(property / 100 * args.ratio);
                 }
                 finalEnemy.enemyHp = finalEnemy.enemyMaxHp;

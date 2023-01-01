@@ -1,6 +1,6 @@
 const { EmbedBuilder, ActionRowBuilder, SelectMenuBuilder, Events, bold, underscore, formatEmoji, hyperlink, chatInputApplicationCommandMention } = require('discord.js');
 
-const { getFirestore, doc, getDocs, collection, getDoc } = require('firebase/firestore');
+const { getFirestore, doc, getDocs, collection, getDoc, increment, updateDoc } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
 const { firebaseConfig } = require('../firebaseConfig.js');
 const { ErrorEmbed, EventErrors } = require('../errors/errors.js');
@@ -102,10 +102,17 @@ module.exports = {
         const activeBattleSelectMenu = new SelectMenuBuilder();
         activeBattleSelectMenu.setCustomId(`battleFlow-selectMenu-activeBattle/${message.author.id}`).setPlaceholder('Target a enemy already in battle...');
         let unique = 1;
-        const eliteConstant = 10;
+        const eliteConstant = 0.1;
+        const elitePower = 1;
         let eliteCount = 0;
 
-        const activeBattles = await getDoc(doc(db, message.author.id, 'ActiveBattles'));
+        let activeBattles = await getDoc(doc(db, message.author.id, 'ActiveBattles'));
+        if (activeBattles.data()?.battles.amount > 0 && !activeBattles.data()?.battles.battle0) {
+            await updateDoc(doc(db, message.author.id, 'ActiveBattles'), {
+                [ 'battles.amount' ]: 0,
+            }, { merge: true });
+            activeBattles = await getDoc(doc(db, message.author.id, 'ActiveBattles'));
+        }
 
         if (passed.filter(element => (element == 'pass')).length > 0) {
             let hasActiveBattles = false;
@@ -130,7 +137,7 @@ module.exports = {
 
                     farmChannels.forEach(async farmChannel => {
                         const constant = 0.1;
-                        const power = 0.7;
+                        const power = 0.9;
                         let farmChannelName = '';
                         message.channel.name.match(/\w+/g).forEach(element => {
                             farmChannelName += Utils.CapitalizeFirstLetter(element) + ' ';
@@ -203,7 +210,7 @@ module.exports = {
                                 }
                                 else {
                                     eliteCount++;
-                                    monster.stats[ randProp ] += eliteConstant;
+                                    monster.stats[ randProp ] += Math.round((playerInfo.data().playerLvl / eliteConstant) ** elitePower);
                                     monster.baseXp += monster.baseXp * 0.4;
                                     monster.gold += monster.gold * 0.4;
                                     enemiesListEmbed.addFields(

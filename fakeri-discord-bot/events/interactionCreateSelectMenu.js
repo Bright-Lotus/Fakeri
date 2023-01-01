@@ -51,7 +51,15 @@ module.exports = {
             const target = idSplit[ 3 ];
             const abilityID = idSplit[ 4 ];
 
-            await ability(abilityID, target, interaction.user);
+            await ability(abilityID, target, interaction.user).then(results => {
+                const orbUsedEmbed = new EmbedBuilder()
+                    .setTitle('Has usado la habilidad seleccionada!')
+                    .setColor('Blue')
+                    .setDescription(`Mana restante: **${results.manaRemaining}** ${formatEmoji(Icons.Mana)}`);
+                interaction.reply({ embeds: [ orbUsedEmbed ], ephemeral: true });
+            }).catch(results => {
+                interaction.reply({ embeds: [ results.manaEmbed ], ephemeral: true });
+            });
             return;
         }
 
@@ -802,6 +810,31 @@ module.exports = {
                     messageEmbeds.push(enemyAttackedEmbed);
                 });
                 return await interaction.editReply({ embeds: messageEmbeds });
+            }).catch(async (results) => {
+                const deadEmbed = new EmbedBuilder()
+                    .setTitle('Has muerto!')
+                    .setColor('Red')
+                    .setDescription(`No puedes hacer nada hasta que revivas.\n${bold('Reviviras en 8 mega-revers.')}`);
+                await interaction.user.send({ embeds: [ deadEmbed ] });
+                await updateDoc(doc(db, 'Event/Timeouts'), {
+                    [ 'timestamps' ]: arrayUnion({
+                        timeoutDate: Timestamp.fromMillis(new Date().setHours(new Date().getHours() + 4)),
+                        type: 'revive',
+                        target: interaction.user.id,
+                    }),
+                }, { merge: true });
+
+                setTimeout(async (user, hpManager) => {
+                    await hpManager('revive', user);
+                    user.send({
+                        embeds: [
+                            new EmbedBuilder()
+                                .setTitle('Has revivido!')
+                                .setDescription('Ya puedes usar acciones de nuevo')
+                                .setColor('Green'),
+                        ],
+                    });
+                }, (36e5 * 4), interaction.user, healthManager);
             });
             return;
         }

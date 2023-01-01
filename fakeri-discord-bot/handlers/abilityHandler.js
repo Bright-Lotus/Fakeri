@@ -16,7 +16,7 @@ async function ability(abilityID, target, user) {
         const playerInfo = await getDoc(doc(db, user.id, 'PlayerInfo'));
         let abilityOrb;
         const playerEquipment = await getDoc(doc(db, user.id, 'PlayerInfo/Inventory/Equipment'));
-        const enemy = await getDoc(doc(db, user.id, 'ActiveBattles')).battles[ `battle${target}` ];
+        const enemy = await getDoc(doc(db, user.id, 'ActiveBattles'))?.battles?.[ `battle${target}` ] || {};
         if (playerEquipment.exists()) {
             abilityOrb = playerEquipment.data().abilityOrbs[ `abilityOrb${abilityID}` ];
             if (playerInfo.data().stats.mana < abilityOrb.requiredMana) {

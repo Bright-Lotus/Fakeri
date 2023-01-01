@@ -217,7 +217,7 @@ async function attack(user, enemy, client, farmChannel) {
                             [ `stats.${bonus.type}` ]: increment(-Math.abs((playerInfo.data().stats[ bonus.type ] / 100 * bonusAmount))),
                         }, { merge: true });
                     }
-                    return resolve({ enemyAttacked: true, damageReceived: `${enemyDmg} ${emojisBonusDmg}`, remainingHp: `${remainingHp} / **${playerInfo.data().stats.maxHp}** ${Utils.HpEmoji(remainingHp, playerInfo.data().stats.maxHp)} ${lifesteal}` });
+                    return resolve({ enemyAttacked: true, damageReceived: `${Math.round(enemyDmg)} ${emojisBonusDmg}`, remainingHp: `${Math.round(remainingHp)} / **${playerInfo.data().stats.maxHp}** ${Utils.HpEmoji(remainingHp, playerInfo.data().stats.maxHp)} ${lifesteal}` });
                 }
 
                 console.log('🚀 ~ file: attackHandler.js:125 ~ returnnewPromise ~ finalEnemy.enemyHp', finalEnemy.enemyHp);
@@ -426,7 +426,7 @@ async function attack(user, enemy, client, farmChannel) {
                         await Promise.all(finalEnemy.keywords.map(async keyword => {
                             if (keyword.type != 'LastBreath') return;
                             await keywordHandler(keyword.type, keyword.subtype, finalEnemy, user, { ratio: keyword.ratio }).then(results => {
-                                resolveResults = { enemyKilled: true, xp: Math.round((enemyXp / 100) * (playerInfo.data().xpBonus + 100)), gold: enemyGold, damageDone: `${(emojisDmg.trim() == '') ? finalDamage : bold(finalDamage)} ${emojisDmg}`, enemySplitted: results.enemySplitted };
+                                resolveResults = { enemyKilled: true, xp: Math.round((enemyXp / 100) * (playerInfo.data().xpBonus + 100)), gold: enemyGold, damageDone: `${(emojisDmg.trim() == '') ? Math.round(finalDamage) : bold(Math.round(finalDamage))} ${emojisDmg}`, enemySplitted: results.enemySplitted };
                             });
                             return true;
                         }));
@@ -445,7 +445,7 @@ async function attack(user, enemy, client, farmChannel) {
                             [ `stats.${bonus.type}` ]: increment(-Math.abs((playerInfo.data().stats[ bonus.type ] / 100 * bonusAmount))),
                         }, { merge: true });
                     }
-                    return resolve({ enemyKilled: true, xp: Math.round((enemyXp / 100) * (playerInfo.data().xpBonus + 100)), gold: enemyGold, damageDone: `${(emojisDmg.trim() == '') ? finalDamage : bold(finalDamage)} ${emojisDmg}` });
+                    return resolve({ enemyKilled: true, xp: Math.round((enemyXp / 100) * (playerInfo.data().xpBonus + 100)), gold: enemyGold, damageDone: `${(emojisDmg.trim() == '') ? Math.round(finalDamage) : bold(Math.round(finalDamage))} ${emojisDmg}` });
                 }
 
                 if (finalEnemy.enemyHp > finalEnemy.enemyMaxHp) finalEnemy.enemyHp = finalEnemy.enemyMaxHp;
@@ -458,7 +458,7 @@ async function attack(user, enemy, client, farmChannel) {
                         [ `stats.${bonus.type}` ]: increment(-Math.abs((playerInfo.data().stats[ bonus.type ] / 100 * bonusAmount))),
                     }, { merge: true });
                 }
-                return resolve({ damageDone: `${(emojisDmg.trim() == '') ? finalDamage : bold(finalDamage)} ${emojisDmg}`, enemyHpRemaining: `${finalEnemy.enemyHp} / **${finalEnemy.enemyMaxHp}** ${Utils.HpEmoji(finalEnemy.enemyHp, finalEnemy.enemyMaxHp)}` });
+                return resolve({ damageDone: `${(emojisDmg.trim() == '') ? Math.round(finalDamage) : bold(Math.round(finalDamage))} ${emojisDmg}`, enemyHpRemaining: `${finalEnemy.enemyHp} / **${finalEnemy.enemyMaxHp}** ${Utils.HpEmoji(finalEnemy.enemyHp, finalEnemy.enemyMaxHp)}` });
             }
         }
     });
