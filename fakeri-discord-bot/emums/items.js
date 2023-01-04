@@ -1658,6 +1658,12 @@ const Consumables = Object.freeze({
         price: 200,
         type: 'mana',
     },
+    consumable8: {
+        amount: 350,
+        name: 'Jugo de Papaya',
+        price: 250,
+        type: 'heal',
+    },
 });
 
 module.exports = { Swords, Wands, Bows, ArmorPlates, EnchanterAbilityOrbs, Consumables };

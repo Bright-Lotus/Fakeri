@@ -64,8 +64,8 @@ async function giftsDrop(client) {
                     console.log('Thy event is an hour');
                     dropsChannel.sendTyping();
                     const portalBlue = new EmbedBuilder()
-                        .setTitle('A mysterious portal has appeared in the sky! 🧿')
-                        .setDescription(`Preliminar analysis tell something may come out of it ${time(Math.floor(dropTime.getTime() / 1000), TimestampStyles.RelativeTime)}`)
+                        .setTitle('Un portal ha aparecido en el cielo! 🧿')
+                        .setDescription(`Podria haber un drop en ${time(Math.floor(dropTime.getTime() / 1000), TimestampStyles.RelativeTime)}`)
                         .setColor('#1370E4');
 
                     dropsChannel.send({

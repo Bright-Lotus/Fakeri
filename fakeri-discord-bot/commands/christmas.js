@@ -342,15 +342,15 @@ async function quests(interaction, weekToDisplay, selectMenu) {
                 }
             }
 
-            if (document.data().locked) {
-                console.log(document.data(), 'bruhhhhhhhh!!!!');
+            if (document.data()?.locked) {
                 weekUnlocked = false;
                 const unlocksDate = new Timestamp(document.data().locked.unlocks.seconds, document.data().locked.unlocks.nanoseconds).toDate();
                 const lockedEmbed = new EmbedBuilder()
-                    .setTitle('The week you selected is locked!')
-                    .setDescription(`It unlocks <t:${Math.floor(unlocksDate.getTime() / 1000)}:R>`)
+                    .setTitle('Esta semana esta bloqueada!')
+                    .setDescription(`Sera desbloqueada <t:${Math.floor(unlocksDate.getTime() / 1000)}:R> <t:${Math.floor(unlocksDate.getTime() / 1000)}:F>`)
                     .setColor('#FF0000');
-                return interaction.editReply({ embeds: [ lockedEmbed ], attachments: [], components: [ row ] });
+                interaction.editReply({ embeds: [ lockedEmbed ], attachments: [], components: [ row ] });
+                return;
             }
 
             console.log(weekly.data());
@@ -521,14 +521,10 @@ async function quests(interaction, weekToDisplay, selectMenu) {
         if (weekUnlocked && !selectMenu) {
             return interaction.editReply({ files: [ attachment ], components: [ row ], embeds: [ questEmbed ] });
         }
-        return interaction.editReply({ files: [ attachment ], components: [ row ], embeds: [ questEmbed ] });
+        if (selectMenu) {
+            return interaction.editReply({ files: [ attachment ], components: [ row ], embeds: [ questEmbed ] });
+        }
     });
-    // Quest 2 ctx.fillText('90/200', 1200, (sizeOf('./questUI1.png').height - 863));
-    // Quest 3 ctx.fillText('90/200', 1200, (sizeOf('./questUI1.png').height - 640));
-
-    // Quest2 ctx.fillRect(279, (sizeOf('./questUI1.png').height - 894), Math.round(((15 / 200 * 100) / 100) * 873), 35);
-    // Quest 3 ctx.fillRect(279, (sizeOf('./questUI1.png').height - 671), Math.round(((90 / 200 * 100) / 100) * 900), 35);
-
 }
 
 async function questImage(userID, category) {
