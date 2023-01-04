@@ -567,7 +567,37 @@ async function questImage(userID, category) {
             }
             return imgStr;
         case 'Week 2':
-            return './questUI1.png';
+            querySnapshot.forEach(async userMissions => {
+                weeklyQuestsSnap.forEach(async document => {
+                    for (const key in userMissions.data()) {
+                        if (userMissions.data()[ key ] == document.data()[ `quest${key.charAt(7)}` ]?.goal) {
+                            completedArray.push(key.charAt(7));
+                        }
+                    }
+                });
+            });
+
+            for (let i = 1; i < completedArray.length; i++) {
+                for (let j = 0; j < i; j++) {
+                    if (completedArray[ i ] < completedArray[ j ]) {
+                        const x = completedArray[ i ];
+                        completedArray[ i ] = completedArray[ j ];
+                        completedArray[ j ] = x;
+                    }
+                }
+            }
+            completedArray = completedArray.filter(item => item !== '0');
+            console.log(completedArray);
+            completedArray.forEach(element => {
+                imgStr += element.toString();
+            });
+            if (completedArray.length == 0) {
+                imgStr = './assets/questUI/baseWeek2.png';
+            }
+            else {
+                imgStr += '.png';
+            }
+            return imgStr;
         case 'Lyra': return 'assets/questUI/lyraBase.png';
         case 'Arissa': return 'assets/questUI/arissaBase.png';
         case 'Nora': return 'assets/questUI/nora.png';

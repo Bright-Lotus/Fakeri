@@ -10,7 +10,7 @@ const db = getFirestore(app);
 module.exports = {
     name: 'messageCreate',
     once: false,
-    execute: async function (message) {
+    execute: async function(message) {
         for (let index = 0; index < 2; index++) {
 
             const client = message.client;
@@ -43,6 +43,7 @@ module.exports = {
 
                             querySnapshot.forEach(async (document) => {
                                 if (document.id == 'Milestones' || document.id != week) return;
+                                if (document.data()?.locked) return;
 
                                 let current = document.data()[ `mission${i}` ];
                                 const missionGoal = docSnap.data()[ `quest${i}` ].goal;
@@ -102,6 +103,7 @@ module.exports = {
                         case 3:
                             querySnapshot.forEach(async (document) => {
                                 if (document.id == 'Milestones' || document.id != week) return;
+                                if (document.data()?.locked) return;
 
                                 let current = document.data()[ `mission${i}` ];
                                 if (!current) { current = 0; }
@@ -156,6 +158,7 @@ module.exports = {
                         case 5:
                             querySnapshot.forEach(async document => {
                                 if (document.id == 'Milestones' || document.id != week) return;
+                                if (document.data()?.locked) return;
 
                                 let current = document.data()[ `mission${i}` ];
                                 if (!current) { current = 0; }
@@ -236,6 +239,7 @@ module.exports = {
 
                             querySnapshot.forEach(async (document) => {
                                 if (document.id == 'Milestones' || document.id != week) return;
+                                if (document.data()?.locked) return;
                                 let current = document.data()[ `mission${i}` ];
                                 const missionGoal = docSnap.data()[ `quest${i}` ].goal;
                                 const quest = docSnap.data()[ `quest${i}` ];

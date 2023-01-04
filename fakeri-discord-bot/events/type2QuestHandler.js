@@ -52,6 +52,7 @@ module.exports = {
                 if (mission?.type == 2) {
                     querySnapshot.forEach(async (document) => {
                         if (document.id == 'Milestones' || document.id != week) return;
+                        if (document.data()?.locked) return;
                         let current = document.data()[ `mission${i}` ];
                         if (!current) { current = 0; }
                         const missionGoal = docSnap.data()[ `quest${i}` ].goal;
