@@ -1682,4 +1682,4 @@ const Consumables = Object.freeze({
     },
 });
 
-module.exports = { Swords, Wands, Bows, ArmorPlates, EnchanterAbilityOrbs, Consumables };
+module.exports = { Swords, Wands, Bows, ArmorPlates, EnchanterAbilityOrbs, WarriorAbilityOrbs, Consumables };
