@@ -1615,6 +1615,22 @@ const EnchanterAbilityOrbs = Object.freeze({
     },
 });
 
+const WarriorAbilityOrbs = Object.freeze({
+    abilityOrb1: {
+        ratio: '20/20-80',
+        ability: 'empowerAttack',
+        attacks: '3',
+        requiredMana: 300,
+        staticMana: 300,
+        targetClass: 'warrior',
+        target: 'self',
+        desc: 'Esta orbe aumenta el **ATK** tuyo por **{ratio}% Attack POWER** (**20%** - **80%** ✳️)** por **{attacks}** ataques.',
+        minLvl: 1,
+        price: 200,
+        name: 'Fury of the Tiger I',
+    },
+});
+
 const Consumables = Object.freeze({
     consumable1: {
         amount: 50,

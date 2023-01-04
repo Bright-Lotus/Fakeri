@@ -31,6 +31,7 @@ module.exports = {
                         .addChoices(
                             { name: 'Week 1', value: 'Week 1' },
                             { name: 'Week 2', value: 'Week 2' },
+                            { name: 'Week 3', value: 'Week 3' },
                             // { name: 'Milestones', value: 'Milestones' },
                             { name: 'Instructor', value: 'Instructor' },
                             { name: 'Nora', value: 'Nora' },
@@ -264,22 +265,27 @@ async function quests(interaction, weekToDisplay, selectMenu) {
                 .addOptions(
                     {
                         label: 'Week 1',
-                        description: 'Week 1 missions',
+                        description: 'Misiones de la semana 1',
                         value: 'Week 1',
                     },
                     {
                         label: 'Week 2',
-                        description: 'Week 2 missions',
+                        description: 'Misiones de la semana 2',
                         value: 'Week 2',
                     },
                     {
-                        label: 'Milestones',
-                        description: 'Milestone quests',
-                        value: 'Milestones',
+                        label: 'Week 3',
+                        description: 'Misiones de la semana 3',
+                        value: 'Week 3',
                     },
+                    // TODO: Milestones {
+                    //     label: 'Milestones',
+                    //     description: 'Milestone quests',
+                    //     value: 'Milestones',
+                    // },
                     {
                         label: 'Instructor',
-                        description: 'Instructor quests',
+                        description: 'Misiones de tu instructor',
                         value: 'Instructor',
                     },
                 ),
@@ -518,10 +524,7 @@ async function quests(interaction, weekToDisplay, selectMenu) {
             .setColor('#3284EC')
             .setDescription('Saldran nuevas misiones cada semana!');
 
-        if (weekUnlocked && !selectMenu) {
-            return interaction.editReply({ files: [ attachment ], components: [ row ], embeds: [ questEmbed ] });
-        }
-        if (selectMenu) {
+        if (weekUnlocked) {
             return interaction.editReply({ files: [ attachment ], components: [ row ], embeds: [ questEmbed ] });
         }
     });
@@ -529,81 +532,53 @@ async function quests(interaction, weekToDisplay, selectMenu) {
 
 async function questImage(userID, category) {
     const querySnapshot = await getDocs(collection(db, `/${userID}/EventQuestProgression/Weekly`));
-    const weeklyQuestsSnap = await getDocs(collection(db, '/Event'));
+    const missionsQuery = query(collection(db, (category.includes('Week')) ? '/Event' : userID), orderBy('quest0'));
+    const weeklyQuestsSnap = await getDocs(missionsQuery);
 
-    let imgStr = 'assets/questUI/completed/Week1/questUI_missions_completed_';
+    let imgStr = `assets/questUI/completed/Week${category.split(' ')[1]}/questUI_missions_completed_`;
     let completedArray = [];
-    switch (category) {
-        case 'Week 1':
-            querySnapshot.forEach(async userMissions => {
-                weeklyQuestsSnap.forEach(async document => {
-                    for (const key in userMissions.data()) {
-                        if (userMissions.data()[ key ] == document.data()[ `quest${key.charAt(7)}` ]?.goal) {
-                            completedArray.push(key.charAt(7));
-                        }
-                    }
-                });
-            });
-
-            for (let i = 1; i < completedArray.length; i++) {
-                for (let j = 0; j < i; j++) {
-                    if (completedArray[ i ] < completedArray[ j ]) {
-                        const x = completedArray[ i ];
-                        completedArray[ i ] = completedArray[ j ];
-                        completedArray[ j ] = x;
+    if (category.includes('Week')) {
+        querySnapshot.forEach(async userMissions => {
+            weeklyQuestsSnap.forEach(async document => {
+                for (const key in userMissions.data()) {
+                    if (!userMissions.id.includes(category.split(' ')[ 1 ])) continue;
+                    if (userMissions.data()[ key ] == document.data()[ `quest${key.charAt(7)}` ]?.goal) {
+                        completedArray.push(key.charAt(7));
                     }
                 }
-            }
-            completedArray = completedArray.filter(item => item !== '0');
-            console.log(completedArray);
-            completedArray.forEach(element => {
-                imgStr += element.toString();
             });
-            if (completedArray.length == 0) {
-                imgStr = './assets/questUI/baseWeek1.png';
-            }
-            else {
-                imgStr += '.png';
-            }
-            return imgStr;
-        case 'Week 2':
-            querySnapshot.forEach(async userMissions => {
-                weeklyQuestsSnap.forEach(async document => {
-                    for (const key in userMissions.data()) {
-                        if (userMissions.data()[ key ] == document.data()[ `quest${key.charAt(7)}` ]?.goal) {
-                            completedArray.push(key.charAt(7));
-                        }
-                    }
-                });
-            });
+        });
 
-            for (let i = 1; i < completedArray.length; i++) {
-                for (let j = 0; j < i; j++) {
-                    if (completedArray[ i ] < completedArray[ j ]) {
-                        const x = completedArray[ i ];
-                        completedArray[ i ] = completedArray[ j ];
-                        completedArray[ j ] = x;
-                    }
+        for (let i = 1; i < completedArray.length; i++) {
+            for (let j = 0; j < i; j++) {
+                if (completedArray[ i ] < completedArray[ j ]) {
+                    const x = completedArray[ i ];
+                    completedArray[ i ] = completedArray[ j ];
+                    completedArray[ j ] = x;
                 }
             }
-            completedArray = completedArray.filter(item => item !== '0');
-            console.log(completedArray);
-            completedArray.forEach(element => {
-                imgStr += element.toString();
-            });
-            if (completedArray.length == 0) {
-                imgStr = './assets/questUI/baseWeek2.png';
-            }
-            else {
-                imgStr += '.png';
-            }
-            return imgStr;
-        case 'Lyra': return 'assets/questUI/lyraBase.png';
-        case 'Arissa': return 'assets/questUI/arissaBase.png';
-        case 'Nora': return 'assets/questUI/nora.png';
-        case 'Abe': return 'assets/questUI/abeBase.png';
-
-        case 'Milestones':
-            return 'assets/questUI/MilestonesUI/questsUI_milestones.png';
+        }
+        completedArray = completedArray.filter(item => item !== '0');
+        console.log(completedArray);
+        completedArray.forEach(element => {
+            imgStr += element.toString();
+        });
+        if (completedArray.length == 0) {
+            imgStr = `./assets/questUI/baseWeek${category.split(' ')[ 1 ]}.png`;
+        }
+        else {
+            imgStr += '.png';
+        }
+        return imgStr;
+    }
+    else {
+        switch (category) {
+            case 'Lyra': return 'assets/questUI/lyraBase.png';
+            case 'Arissa': return 'assets/questUI/arissaBase.png';
+            case 'Nora': return 'assets/questUI/nora.png';
+            case 'Abe': return 'assets/questUI/abeBase.png';
+            case 'Milestones':
+                return 'assets/questUI/MilestonesUI/questsUI_milestones.png';
+        }
     }
 }
