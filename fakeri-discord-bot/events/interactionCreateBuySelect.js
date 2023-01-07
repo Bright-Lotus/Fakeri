@@ -27,7 +27,7 @@ module.exports = {
         shopInventory.forEach(async document => {
             item = document.data()[ category ][ `${category.slice(0, -1)}${itemId}` ];
         });
-        const filter = msg => msg.content.toLowerCase().includes('confirmar') || msg.content.toLowerCase().includes('rechazar');
+        const filter = msg => (msg.content.toLowerCase().includes('confirmar') && msg.author.id == interaction.user.id || msg.content.toLowerCase().includes('rechazar') && msg.author.id == interaction.user.id);
         let itemStr;
         const playerInfo = (await getDoc(doc(db, interaction.user.id, 'PlayerInfo'))).data();
         const playerClass = playerInfo.class;
@@ -75,14 +75,14 @@ module.exports = {
             .setDescription(itemStr);
         const row = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
-                .setCustomId('accept')
+                .setCustomId('buyInfoBtnAccept')
                 .setLabel('Escribe "confirmar" para comprar el item seleccionado')
                 .setEmoji('➡️')
                 .setStyle(ButtonStyle.Primary),
         );
         const row2 = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
-                .setCustomId('reject')
+                .setCustomId('buyInfoBtnReject')
                 .setLabel('Escribe "rechazar" para no comprarlo')
                 .setEmoji('➡️')
                 .setStyle(ButtonStyle.Danger),

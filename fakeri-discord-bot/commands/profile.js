@@ -34,15 +34,19 @@ async function profile(interaction, args) {
     }
     const playerUser = await interaction.guild.members.fetch(playerID);
     const playerInfo = await getDoc(doc(db, playerID, 'PlayerInfo'));
+    let displayName = playerUser.displayName;
 
     const capitalizeFirstLetter = (string) => {
         return string.charAt(0).toUpperCase() + string.slice(1);
     };
 
     if (playerInfo.exists()) {
+        if (interaction.user.id == '407225705051455491') {
+            displayName = 'Ashe';
+        }
         const playerStats = playerInfo.data().stats;
         const profileEmbed = new EmbedBuilder()
-            .setTitle(`Perfil de ${playerUser.displayName}`)
+            .setTitle(`Perfil de ${displayName}`)
             .setThumbnail(playerUser.displayAvatarURL({ extension: 'jpg' }))
             .setDescription(bold(playerInfo.data().instructor.level.titleName));
 

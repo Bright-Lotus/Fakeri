@@ -4,7 +4,7 @@ const { execute } = require('../handlers/shopHandler.js');
 const { initializeApp } = require('firebase/app');
 const { firebaseConfig } = require('../firebaseConfig.js');
 const { pagination } = require('../handlers/paginationHandler.js');
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, EmbedBuilder } = require('discord.js');
 const { inventoryExecute } = require('../commands/inventory.js');
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -44,6 +44,14 @@ module.exports = {
     name: 'interactionCreate',
     async execute(interaction) {
         if (!interaction.isButton()) return;
+        if (interaction.customId.includes('buyInfoBtn')) {
+            const infoEmbed = new EmbedBuilder()
+                .setTitle('Informacion')
+                .setDescription('Por favor escribe en el chat **"confirmar"** o **"rechazar"**\n\n**No hagas clic en el boton!**')
+                .setColor('Red');
+            interaction.reply({ embeds: [ infoEmbed ], ephemeral: true });
+            return;
+        }
         if (interaction.customId.includes('filterButton-abiilty-target')) {
             const filterModal = new ModalBuilder()
                 .setCustomId(interaction.customId.replace('Button', 'Modal'))
@@ -81,6 +89,20 @@ module.exports = {
                 const itemsArray = Object.values(items).filter(element => (typeof element != 'number'));
                 await pagination('inventorySwords', itemsArray, page, interaction.user).then(results => {
                     interaction.update({ embeds: [ results.embed ], components: [ results.paginationRow, itemRow, results.selectMenuRow ] });
+                });
+            }
+            return;
+        }
+        if (interaction.customId.includes('consumablesModal')) {
+            const idSplit = interaction.customId.split('-');
+            const page = Number(idSplit[ 1 ].match(/\d+/g)[ 0 ]);
+
+            const equipment = await getDoc(doc(db, interaction.user.id, 'PlayerInfo/Inventory/Equipment'));
+            if (equipment.exists()) {
+                const items = equipment.data().consumables;
+                const itemsArray = Object.values(items).filter(element => (typeof element != 'number'));
+                await pagination('consumables', itemsArray, page, interaction.user).then(results => {
+                    interaction.update({ embeds: [ results.embed ], components: [ results.paginationRow, results.selectMenuRow ] });
                 });
             }
             return;
@@ -127,7 +149,7 @@ module.exports = {
                     return b.eventPts - a.eventPts;
                 });
                 console.log(sortedArray);
-                await pagination('leaderboard', sortedArray, interaction.customId.split('-')[1].charAt(4), interaction.user, { arraySorted: true }).then(results => {
+                await pagination('leaderboard', sortedArray, interaction.customId.split('-')[ 1 ].charAt(4), interaction.user, { arraySorted: true }).then(results => {
                     interaction.update({ embeds: [ results.embed ], components: [ results.paginationRow ] });
                 });
                 return;

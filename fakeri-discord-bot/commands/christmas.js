@@ -306,15 +306,18 @@ async function quests(interaction, weekToDisplay, selectMenu) {
     context.fillStyle = '#fff';
 
     let fontSize = 100;
-
+    let displayName = interaction.member.displayName;
+    if (interaction.user.id == '407225705051455491') {
+        displayName = 'Ashe';
+    }
     do {
         // Assign the font to the context and decrement it so it can be measured again
         fontSize -= 5;
         context.font = `${fontSize}px "Burbank Big"`;
         // Compare pixel width of the text to the canvas minus the approximate avatar size
-    } while (context.measureText(interaction.member.displayName).width > canvas.width - 1050);
+    } while (context.measureText(displayName).width > canvas.width - 1050);
 
-    context.fillText(interaction.member.displayName, 1440, (sizeOf('./questUI1.png').height - 2165));
+    context.fillText(displayName, 1440, (sizeOf('./questUI1.png').height - 2165));
     context.textAlign = 'start';
     let weekUnlocked = true;
     let attachment;
@@ -535,7 +538,7 @@ async function questImage(userID, category) {
     const missionsQuery = query(collection(db, (category.includes('Week')) ? '/Event' : userID), orderBy('quest0'));
     const weeklyQuestsSnap = await getDocs(missionsQuery);
 
-    let imgStr = `assets/questUI/completed/Week${category.split(' ')[1]}/questUI_missions_completed_`;
+    let imgStr = `assets/questUI/completed/Week${category.split(' ')[ 1 ]}/questUI_missions_completed_`;
     let completedArray = [];
     if (category.includes('Week')) {
         querySnapshot.forEach(async userMissions => {

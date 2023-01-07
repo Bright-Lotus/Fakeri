@@ -27,8 +27,12 @@ async function dialogHandler(dialogName, step, interaction, option, category, ar
             const dialogEmbed = new EmbedBuilder();
             if (step == 1) {
                 let embedMessage = dialog.dialog.step1.message;
+                let displayName = interaction.member.displayName;
+                if (interaction.user.id == '407225705051455491') {
+                    displayName = 'Ashe';
+                }
                 if (embedMessage.includes('{displayName}')) {
-                    embedMessage = embedMessage.replace('{displayName}', interaction.member.displayName);
+                    embedMessage = embedMessage.replace('{displayName}', displayName);
                 }
                 dialogEmbed
                     .setTitle(dialog.dialog.step1.name)
@@ -38,7 +42,7 @@ async function dialogHandler(dialogName, step, interaction, option, category, ar
                 if (dialog?.dialog[ `step${step}` ]?.options) {
                     for (const [ key, value ] of Object.entries(dialog.dialog[ `step${step}` ].options)) {
                         if (value.text.includes('{displayName}')) {
-                            value.text = value.text.replace('{displayName}', interaction.member.displayName);
+                            value.text = value.text.replace('{displayName}', displayName);
                         }
                         row.addComponents(
                             new ButtonBuilder()
@@ -138,12 +142,12 @@ async function dialogHandler(dialogName, step, interaction, option, category, ar
                                 .setTitle(`${targetCharacterQuest} te ha dado una nueva mision!`)
                                 .setColor(dialog.dialog.embedColor)
                                 .setDescription(bold(targetQuest.mission));
-                                await setDoc(doc(db, `${interaction.user.id}/Quests${targetCharacterQuest}`), {
-                                    [ `quest${targetQuest.position}` ]: targetQuest,
-                                });
-                                await setDoc(doc(db, `${interaction.user.id}/EventQuestProgression/Weekly/${targetCharacterQuest}`), {
-                                    [ `mission${targetQuest.position}` ]: 0,
-                                });
+                            await setDoc(doc(db, `${interaction.user.id}/Quests${targetCharacterQuest}`), {
+                                [ `quest${targetQuest.position}` ]: targetQuest,
+                            });
+                            await setDoc(doc(db, `${interaction.user.id}/EventQuestProgression/Weekly/${targetCharacterQuest}`), {
+                                [ `mission${targetQuest.position}` ]: 0,
+                            });
                             if (dialog.dialog?.ephemeral) {
                                 if (interaction?.deferred || interaction?.replied) { return interaction.followUp({ embeds: [ dialogEmbed, questEmbed ], components: [ row ], ephemeral: true }); }
                                 else { return interaction.reply({ embeds: [ dialogEmbed ], components: [ row ], ephemeral: true }); }

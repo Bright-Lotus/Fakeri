@@ -137,7 +137,7 @@ module.exports = {
 
                     farmChannels.forEach(async farmChannel => {
                         const constant = 0.1;
-                        const power = 0.9;
+                        const power = 1.2;
                         let farmChannelName = '';
                         message.channel.name.match(/\w+/g).forEach(element => {
                             farmChannelName += Utils.CapitalizeFirstLetter(element) + ' ';
@@ -170,8 +170,7 @@ module.exports = {
                                 monster.gold += Math.round((playerInfo.data().playerLvl / 0.1) ** 0.9);
                                 for (const stat of Object.keys(monster.stats)) {
                                     if (playerInfo.data().class == 'archer' && playerInfo.data().playerLvl < farmChannel.minLvl) {
-                                        monster.stats[ stat ] += Math.round((playerInfo.data().playerLvl / constant) ** power);
-                                        monster.stats[ stat ] -= Math.round((Math.abs(playerInfo.data().playerLvl - farmChannel.minLvl) / 0.1) ** 0.5);
+                                        monster.stats[ stat ] += Math.round((playerInfo.data().playerLvl / constant) ** 1.5);
                                         if (monster.stats[ stat ] < 0) {
                                             monster.stats[ stat ] = 0;
                                         }

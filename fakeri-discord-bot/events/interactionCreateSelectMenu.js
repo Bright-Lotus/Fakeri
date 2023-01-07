@@ -1,4 +1,4 @@
-const { getFirestore, doc, setDoc, updateDoc, getDoc, increment, arrayUnion, Timestamp, addDoc, collection } = require('firebase/firestore');
+const { getFirestore, doc, setDoc, updateDoc, getDoc, increment, arrayUnion, Timestamp, addDoc, collection, deleteDoc, deleteField } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
 const { firebaseConfig } = require('../firebaseConfig.js');
 
@@ -30,7 +30,6 @@ module.exports = {
                 return interaction.reply({ embeds: [ErrorEmbed(EventErrors.NotOwnerOfInteraction)], ephemeral: true });
             }
         */
-
         // If the user selected an ability orb from the ability select menu
         if (interaction.customId.includes('abilityModal-selectMenu/')) {
             if (interaction.user.id != interaction.customId.split('/')[ 1 ]) {
@@ -317,6 +316,11 @@ module.exports = {
                         await updateDoc(doc(db, interaction.user.id, 'PlayerInfo/Inventory/Equipment'), {
                             [ `consumables.consumable${consumableID}.consumableAmount` ]: (consumable.consumableAmount != 0) ? increment(-1) : 0,
                         }, { merge: true });
+                        if (consumable.consumableAmount == 0) {
+                            await updateDoc(doc(db, interaction.user.id, 'PlayerInfo/Inventory/Equipment'), {
+                                [ `consumables.consumable${consumableID}` ]: deleteField(),
+                            }, { merge: true });
+                        }
                         break;
                     }
 
