@@ -316,7 +316,7 @@ module.exports = {
                         await updateDoc(doc(db, interaction.user.id, 'PlayerInfo/Inventory/Equipment'), {
                             [ `consumables.consumable${consumableID}.consumableAmount` ]: (consumable.consumableAmount != 0) ? increment(-1) : 0,
                         }, { merge: true });
-                        if (consumable.consumableAmount == 0) {
+                        if ((consumable.consumableAmount - 1) == 0) {
                             await updateDoc(doc(db, interaction.user.id, 'PlayerInfo/Inventory/Equipment'), {
                                 [ `consumables.consumable${consumableID}` ]: deleteField(),
                             }, { merge: true });
@@ -345,6 +345,11 @@ module.exports = {
                         await updateDoc(doc(db, interaction.user.id, 'PlayerInfo/Inventory/Equipment'), {
                             [ `consumables.consumable${consumableID}.consumableAmount` ]: (consumable.consumableAmount != 0) ? increment(-1) : 0,
                         }, { merge: true });
+                        if ((consumable.consumableAmount - 1) == 0) {
+                            await updateDoc(doc(db, interaction.user.id, 'PlayerInfo/Inventory/Equipment'), {
+                                [ `consumables.consumable${consumableID}` ]: deleteField(),
+                            }, { merge: true });
+                        }
                         break;
                     }
                 }
