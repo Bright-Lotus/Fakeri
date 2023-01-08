@@ -143,7 +143,6 @@ module.exports = {
                             farmChannelName += Utils.CapitalizeFirstLetter(element) + ' ';
                         });
                         enemiesListEmbed.setAuthor({ name: `Actualmente estas en ${farmChannelName}` });
-                        console.log('debugarcher', playerInfo.data().playerLvl + 5, farmChannel.minLvl, (playerInfo.data().class == 'archer' && playerInfo.data().playerLvl + 5 < farmChannel.minLvl));
                         if (playerInfo.data().class == 'archer' && playerInfo.data().playerLvl + 5 < farmChannel.minLvl) {
                             return message.reply({ embeds: [ ErrorEmbed(EventErrors.NotEnoughLevelForZone, `Necesitas ser nivel ${Icons.Level} ${bold(farmChannel.minLvl)} para esta zona\nEres nivel ${Icons.Level} ${bold(playerInfo.data().playerLvl + 5)} 🏹 ahora mismo.`) ] });
                         }
@@ -247,7 +246,6 @@ module.exports = {
 
                         if (activeBattles.data()?.battles.amount > 0) {
                             await Promise.all(Object.values(activeBattles.data().battles).filter(element => (typeof element != 'number')).map(async battle => {
-                                console.log(battle, 'debugpromisebattles');
                                 const enemy = await getDoc(doc(db, 'Event/Enemies/RegularMonsters/Monsters'));
 
                                 if (enemy.exists()) {
@@ -269,8 +267,6 @@ module.exports = {
                                                 displayName = 'Last Breath';
                                             }
                                             else if (keyword?.type?.match(/[A-Z]/g)?.length < 2) { displayName = keyword.type; }
-                                            console.log('🚀 ~ file: farmChannel.js:191 ~ awaitPromise.all ~ keyword', keyword);
-                                            console.log(keyword, 'debugkeyword');
                                             keywordStr += `${formatKeyword(keyword.type, displayName)}\n${formatKeywordDesc(keyword.subtype, { ratio: keyword.ratio })}\n\n`;
                                         }
                                     });
@@ -315,22 +311,17 @@ module.exports = {
 
                             const activeBattleRow = new ActionRowBuilder();
                             activeBattleRow.addComponents(activeBattleSelectMenu);
-                            console.log(row.components);
-                            console.log('start repl');
                             if ((activeBattles.data().battles.length + 1) > 3) {
                                 return message.reply({ embeds: [ activeBattlesListEmbed ], components: [ activeBattleRow ], ephemeral: true });
                             }
                             if (eliteCount > 0) enemiesListEmbed.setColor('#8A1DE6');
-                            console.log(row, 'debugrow2');
                             message.reply({ embeds: [ enemiesListEmbed, activeBattlesListEmbed ], components: [ row, activeBattleRow ], ephemeral: true });
                         }
                         else {
-                            console.log(row, 'debugrow3');
                             if (eliteCount > 0) enemiesListEmbed.setColor('#8A1DE6');
                             message.reply({ embeds: [ enemiesListEmbed ], components: [ row.toJSON() ], ephemeral: true }).catch(err => console.error(err));
                         }
                     }
-                    console.log(hasActiveBattles, 'debug');
                     break;
 
 

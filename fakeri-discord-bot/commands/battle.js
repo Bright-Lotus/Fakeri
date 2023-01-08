@@ -76,12 +76,10 @@ async function duel(interaction) {
 
     // Handle Requests Command
     if (interaction.options.getSubcommand() === 'requests') {
-        console.log(interaction.user.id);
         const docRef = doc(db, interaction.user.id, 'PendingRequests');
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-            console.log('Document data:', docSnap.data());
             let listString = ' ';
 
             for (let i = 0; i < 10; i++) {
