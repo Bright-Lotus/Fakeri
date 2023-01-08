@@ -1,11 +1,13 @@
-const { getDoc, doc, getFirestore } = require('firebase/firestore');
+const { getDoc, doc, getFirestore, collection, getDocs, updateDoc, increment } = require('firebase/firestore');
 const { ErrorEmbed, EventErrors } = require('../errors/errors.js');
 const { execute } = require('../handlers/shopHandler.js');
 const { initializeApp } = require('firebase/app');
 const { firebaseConfig } = require('../firebaseConfig.js');
 const { pagination } = require('../handlers/paginationHandler.js');
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, EmbedBuilder } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, EmbedBuilder, bold, underscore } = require('discord.js');
 const { inventoryExecute } = require('../commands/inventory.js');
+const { Colors } = require('../emums/colors.js');
+const { goldManager } = require('../handlers/goldHandler.js');
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -44,13 +46,93 @@ module.exports = {
     name: 'interactionCreate',
     async execute(interaction) {
         if (!interaction.isButton()) return;
-        if (interaction.customId.includes('buyInfoBtn')) {
-            const infoEmbed = new EmbedBuilder()
-                .setTitle('Informacion')
-                .setDescription('Por favor escribe en el chat **"confirmar"** o **"rechazar"**\n\n**No hagas clic en el boton!**')
-                .setColor('Red');
-            interaction.reply({ embeds: [ infoEmbed ], ephemeral: true });
+        if (interaction.customId.includes('buyInfoBtnAccept')) {
+            if (interaction.user.id != interaction.customId.split('/')[ 1 ]) {
+                return interaction.reply({ embeds: [ ErrorEmbed(EventErrors.NotOwnerOfInteraction) ], ephemeral: true });
+            }
+            const idSplit = interaction.customId.split('-')[ 1 ].split('|');
+            const itemId = idSplit[ 1 ];
+            const shopInventory = await getDocs(collection(db, '/Event/Shop/ShopInventory'));
+            let item;
+            shopInventory.forEach(async document => {
+                item = document.data()[ idSplit[ 0 ] ][ itemId ];
+            });
+            const category = idSplit[ 0 ];
+            console.log(idSplit, itemId, item);
+            await goldManager('buy', item.price, interaction.user)
+                .then(async result => {
+                    const buyResponses = [
+                        'Pff, disfruta',
+                        'OYE ME PAGASTE MENOS DE LO QUE ERA\n...\nAh no olvidalo',
+                        'Ya te puedes ir!\nO compra algo mas entonces',
+                        'Considera comprar otras cosas tambien, necesito dinero',
+                        '...',
+                        'Uhhhhh, gracias',
+                    ];
+                    const thanksEmbed = new EmbedBuilder()
+                        .setTitle('Nora')
+                        .setColor(Colors.NoraColor)
+                        .setDescription(buyResponses[ Math.floor(Math.random() * buyResponses.length) ]);
+                    const dialogEnd = new ActionRowBuilder().addComponents(
+                        new ButtonBuilder()
+                            .setCustomId('end')
+                            .setLabel('Dialog has ended')
+                            .setStyle(ButtonStyle.Secondary)
+                            .setEmoji('🛑'),
+                    );
+
+                    const goldEmbed = new EmbedBuilder()
+                        .setTitle('La compra ha sido exitosa')
+                        .setAuthor({ name: 'Banco Aelram ◑ Factura' })
+                        .setDescription(`${bold('Has comprado ' + underscore(item.name) + ' por ' + underscore(item.price) + ' oro')}\nOro restante: ${result}`)
+                        .setColor('Gold');
+
+                    const docSnap = await getDoc(doc(db, interaction.user.id, 'PlayerInfo/Inventory/Equipment'));
+                    let itemAmount;
+                    if (docSnap.exists()) {
+                        if (!docSnap?.data()?.[ `${category}` ]) {
+                            await updateDoc(doc(db, interaction.user.id, 'PlayerInfo/Inventory/Equipment'), {
+                                [ category ]: { amount: 0 },
+                            }, { merge: true });
+                        }
+                        itemAmount = docSnap.data()[ `${category}` ]?.amount || 0;
+                    }
+                    console.log(itemAmount);
+
+                    item = { ...item, id: itemAmount + 1 };
+                    if (category == 'consumables') {
+                        await updateDoc(doc(db, interaction.user.id, 'PlayerInfo/Inventory/Equipment'), {
+                            [ category ]: { ...docSnap.data()?.[ `${category}` ], amount: itemAmount + 1, [ `${category.slice(0, -1)}${itemAmount + 1}` ]: item },
+                        }, { merge: true });
+                        await updateDoc(doc(db, interaction.user.id, 'PlayerInfo/Inventory/Equipment'), {
+                            [ `${category}.${category.slice(0, -1)}${itemAmount + 1}.consumableAmount` ]: increment(1),
+                        }, { merge: true });
+                    }
+                    else {
+                        await updateDoc(doc(db, interaction.user.id, 'PlayerInfo/Inventory/Equipment'), {
+                            [ category ]: { ...docSnap.data()?.[ `${category}` ], amount: itemAmount + 1, [ `${category.slice(0, -1)}${itemAmount + 1}` ]: item },
+                        }, { merge: true });
+                    }
+                    await interaction.reply({ embeds: [ goldEmbed, thanksEmbed ], components: [ dialogEnd ] });
+                    console.log('wut');
+                }).catch(error => {
+                    if (error.errorCode == EventErrors.NotEnoughGold) {
+                        const goldErrorEmbed = new EmbedBuilder()
+                            .setTitle('Nora')
+                            .setColor('#C600FF')
+                            .setDescription('Compra algo mas barato o vuelve cuando tengas mas oro!!');
+                        return interaction.reply({ embeds: [ error.errorEmbed, goldErrorEmbed ] });
+                    }
+                });
+
             return;
+        }
+        if (interaction.customId.includes('buyInfoBtnReject')) {
+            const rejectedEmbed = new EmbedBuilder()
+                .setTitle('Nora')
+                .setColor('#C600FF')
+                .setDescription('Mira lo que te gusta y COMPRALO!\nY deja de desperdiciar mi tiempo!');
+            return interaction.reply({ embeds: [ rejectedEmbed ] });
         }
         if (interaction.customId.includes('filterButton-abiilty-target')) {
             const filterModal = new ModalBuilder()

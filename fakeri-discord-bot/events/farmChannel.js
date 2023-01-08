@@ -170,7 +170,7 @@ module.exports = {
                                 monster.gold += Math.round((playerInfo.data().playerLvl / 0.1) ** 0.9);
                                 for (const stat of Object.keys(monster.stats)) {
                                     if (playerInfo.data().class == 'archer' && playerInfo.data().playerLvl < farmChannel.minLvl) {
-                                        monster.stats[ stat ] += Math.round((playerInfo.data().playerLvl / constant) ** 1.5);
+                                        monster.stats[ stat ] += Math.round((playerInfo.data().playerLvl / constant) ** 1.3);
                                         if (monster.stats[ stat ] < 0) {
                                             monster.stats[ stat ] = 0;
                                         }
@@ -318,16 +318,16 @@ module.exports = {
                             console.log(row.components);
                             console.log('start repl');
                             if ((activeBattles.data().battles.length + 1) > 3) {
-                                return message.reply({ embeds: [ activeBattlesListEmbed ], components: [ activeBattleRow ] });
+                                return message.reply({ embeds: [ activeBattlesListEmbed ], components: [ activeBattleRow ], ephemeral: true });
                             }
                             if (eliteCount > 0) enemiesListEmbed.setColor('#8A1DE6');
                             console.log(row, 'debugrow2');
-                            message.reply({ embeds: [ enemiesListEmbed, activeBattlesListEmbed ], components: [ row, activeBattleRow ] });
+                            message.reply({ embeds: [ enemiesListEmbed, activeBattlesListEmbed ], components: [ row, activeBattleRow ], ephemeral: true });
                         }
                         else {
                             console.log(row, 'debugrow3');
                             if (eliteCount > 0) enemiesListEmbed.setColor('#8A1DE6');
-                            message.reply({ embeds: [ enemiesListEmbed ], components: [ row.toJSON() ] }).catch(err => console.error(err));
+                            message.reply({ embeds: [ enemiesListEmbed ], components: [ row.toJSON() ], ephemeral: true }).catch(err => console.error(err));
                         }
                     }
                     console.log(hasActiveBattles, 'debug');

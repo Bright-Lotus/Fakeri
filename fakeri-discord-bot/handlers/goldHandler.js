@@ -22,17 +22,18 @@ async function goldManager(action, amount, user) {
             }
         }
         else if (action == 'buy') {
-            console.log('waiting');
             const playerInfo = await getDoc(doc(db, user.id, 'PlayerInfo'));
             if (playerInfo.exists()) {
                 const playerGold = playerInfo.data().gold;
                 if (amount > playerGold) {
                     const embed = ErrorEmbed(EventErrors.NotEnoughGold, `Oro que tienes: ${playerGold} ${Icons.Gold}\nOro que necesitas: ${amount} ${Icons.Gold}`);
+                    console.log('Transaction failed! | Not enough gold | at goldHandler.js - line 30');
                     return reject({ errorEmbed: embed, errorCode: EventErrors.NotEnoughGold });
                 }
                 await updateDoc(doc(db, user.id, 'PlayerInfo'), {
                     ['gold']: increment(-Math.abs(amount)),
                 }, { merge: true });
+                console.log('Transaction completed! at goldHandler.js - line 35');
                 return resolve(playerGold - amount);
             }
         }

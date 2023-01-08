@@ -20,10 +20,10 @@ module.exports = {
         if (interaction.user.id != interaction.customId.split('-')[ 2 ]) {
             return interaction.reply({ embeds: [ ErrorEmbed(EventErrors.NotOwnerOfInteraction) ], ephemeral: true });
         }
-        const shopInventory = await getDocs(collection(db, '/Event/Shop/ShopInventory'));
         const itemId = interaction.values[ 0 ].split('-')[ 3 ];
         const category = interaction.values[ 0 ].split('-')[ 4 ];
         let item;
+        const shopInventory = await getDocs(collection(db, '/Event/Shop/ShopInventory'));
         shopInventory.forEach(async document => {
             item = document.data()[ category ][ `${category.slice(0, -1)}${itemId}` ];
         });
@@ -75,21 +75,21 @@ module.exports = {
             .setDescription(itemStr);
         const row = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
-                .setCustomId('buyInfoBtnAccept')
-                .setLabel('Escribe "confirmar" para comprar el item seleccionado')
-                .setEmoji('➡️')
-                .setStyle(ButtonStyle.Primary),
+                .setCustomId(`buyInfoBtnAccept-${category}|${category.slice(0, -1)}${itemId}-/${interaction.user.id}`)
+                .setLabel('Confirmar compra')
+                .setEmoji('✅')
+                .setStyle(ButtonStyle.Success),
         );
         const row2 = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
                 .setCustomId('buyInfoBtnReject')
-                .setLabel('Escribe "rechazar" para no comprarlo')
-                .setEmoji('➡️')
+                .setLabel('Rechazar compra')
+                .setEmoji('⛔')
                 .setStyle(ButtonStyle.Danger),
         );
         interaction.editReply({ embeds: [ confirmationEmbed, itemEmbed ], components: [ row, row2 ], fetchReply: true })
             .then(() => {
-                interaction.channel.awaitMessages({ filter, max: 1, time: 10000, errors: [ 'time' ] })
+                interaction.channel.awaitMessages({ filter, max: 1, time: 20000, errors: [ 'time' ] })
                     .then(async collected => {
                         if (collected.first().content.toLowerCase() == 'confirmar') {
                             await goldManager('buy', item.price, interaction.user)
@@ -147,6 +147,11 @@ module.exports = {
                                         }, { merge: true });
                                     }
                                     collected.first().reply({ embeds: [ goldEmbed, thanksEmbed ], components: [ dialogEnd ] });
+                                    const infoEmbed = new EmbedBuilder()
+                                        .setTitle('Informacion')
+                                        .setDescription('Debido a los siguientes tres tontitos que no quisieron leer o no tuvieron suficiente IQ para entender, ahora **ya es posible usar los botones para confirmar o rechazar tu compra:**\n- **Contodorespeto (En especial este)**\n- Erziok\n- Joang\n\nSolo hazle clic a los botones respectivos!')
+                                        .setColor('Red');
+                                    interaction.followUp({ embeds: [ infoEmbed ], ephemeral: true });
                                     return;
                                 }).catch(error => {
                                     if (error.errorCode == EventErrors.NotEnoughGold) {
