@@ -60,6 +60,10 @@ module.exports = {
     name: Events.MessageCreate,
     once: false,
     execute: async function(message) {
+        // Testing purposes
+        await updateDoc(doc(db, 'Event/Info'), {
+            [ 'messageCount' ]: increment(1),
+        }, { merge: true });
         if (message.author.bot) return;
         const farmChannelsSnap = await getDoc(doc(db, message.guild.id, 'FarmChannels'));
         const monsterSnap = await getDocs(collection(db, '/Event/Enemies/RegularMonsters'));
@@ -153,7 +157,7 @@ module.exports = {
                             monsterSnap.forEach(async monsterDoc => {
                                 const monster = monsterDoc.data()[ `enemy${monsters}` ];
                                 monster.elite = Math.random() < 0.3;
-                                const randomProperty = function(obj) {
+                                const randomProperty = function (obj) {
                                     const keys = Object.keys(obj);
 
                                     return keys[ Math.floor(Math.random() * keys.length) ];

@@ -75,6 +75,10 @@ process.on('unhandledRejection', async (err) => {
 	client.channels.fetch('1054804493201571912').then(channel => {
 		channel.send({ content: userMention('1011657604822474873'), embeds: [errorChannelEmbed] });
 	});
+	if (err.message == 'Quota exceeded.') {
+		console.log('Quota exceeded. Exiting...');
+		process.exit(0);
+	}
 });
 process.on('uncaughtException', async (err) => {
 	console.log(chalk.redBright('An error has occured! (Uncaught Exception)'));
@@ -87,7 +91,8 @@ process.on('uncaughtException', async (err) => {
 	client.channels.fetch('1054804493201571912').then(channel => {
 		channel.send({ content: userMention('1011657604822474873'), embeds: [errorChannelEmbed] });
 	});
-});
-process.on('uncaughtExceptionMonitor', async (err) => {
-	console.error('Uncaught Promise Exception (Monitor):\n', err);
+	if (err.message == 'Quota exceeded.') {
+		console.log('Quota exceeded. Exiting...');
+		process.exit(0);
+	}
 });
