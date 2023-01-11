@@ -30,6 +30,9 @@ function formatKeywordDesc(keywordSubtype, args) {
         case 'duelist':
             return `Recibe **${args.ratio} ATK** en cada ataque al jugador`;
 
+        case 'dodge':
+            return `Tiene un chance del **${args.ratio}%** de esquivar el ataque del jugador`;
+
         case 'elusive':
             return `Tiene un chance del **${args.ratio}%** de esquivar el ataque del jugador`;
 
@@ -59,7 +62,7 @@ function formatKeywordDesc(keywordSubtype, args) {
 module.exports = {
     name: Events.MessageCreate,
     once: false,
-    execute: async function(message) {
+    execute: async function (message) {
         // Testing purposes
         await updateDoc(doc(db, 'Event/Info'), {
             [ 'messageCount' ]: increment(1),

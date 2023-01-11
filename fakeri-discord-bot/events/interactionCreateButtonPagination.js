@@ -8,31 +8,98 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBui
 const { inventoryExecute } = require('../commands/inventory.js');
 const { Colors } = require('../emums/colors.js');
 const { goldManager } = require('../handlers/goldHandler.js');
+const { Icons } = require('../emums/icons.js');
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-async function equippedButton(interaction) {
+async function equippedButton(interaction, playerClass) {
     const itemRow = new ActionRowBuilder();
     const equipped = await getDoc(doc(db, interaction.user.id, 'PlayerInfo/Inventory/Equipped'));
+    const equipment = await getDoc(doc(db, interaction.user.id, 'PlayerInfo/Inventory/Equipment'));
     if (equipped.exists()) {
-        if (equipped.data().sword?.id) {
-            console.log('Algo equipado');
-            const swordSnap = await getDoc(doc(db, interaction.user.id, 'PlayerInfo/Inventory/Equipment'));
-            if (swordSnap.exists()) {
-                const sword = swordSnap.data().swords[ `sword${equipped.data().sword.id}` ];
+        if (playerClass == 'warrior') {
+            if (equipped.data().sword?.id) {
+                console.log('Algo equipado');
+                if (equipment.exists()) {
+                    const sword = equipment.data().swords[ `sword${equipped.data().sword.id}` ];
+                    itemRow.addComponents(
+                        new ButtonBuilder()
+                            .setCustomId('equippedSword-btn')
+                            .setEmoji('🪓')
+                            .setStyle(ButtonStyle.Primary)
+                            .setLabel(sword.name),
+                    );
+                }
+            }
+            else {
                 itemRow.addComponents(
                     new ButtonBuilder()
                         .setCustomId('equippedSword-btn')
-                        .setEmoji('🪓')
-                        .setStyle(ButtonStyle.Primary)
-                        .setLabel(sword.name),
+                        .setEmoji('❎')
+                        .setStyle(ButtonStyle.Secondary)
+                        .setLabel('Nada equipado'),
                 );
             }
+        }
+        else if (playerClass == 'archer') {
+            if (equipped.data().bow?.id) {
+                console.log('Algo equipado');
+                const bow = equipment.data().bows[ `bow${equipped.data().bow.id}` ];
+                itemRow.addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('equippedBow-btn')
+                        .setEmoji('🏹')
+                        .setStyle(ButtonStyle.Primary)
+                        .setLabel(bow.name),
+                );
+            }
+            else {
+                itemRow.addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('equippedBow-btn')
+                        .setEmoji('❎')
+                        .setStyle(ButtonStyle.Secondary)
+                        .setLabel('Nada equipado'),
+                );
+            }
+        }
+        else if (playerClass == 'enchanter') {
+            if (equipped.data().wand?.id) {
+                console.log('Algo equipado');
+                const wand = equipment.data().wands[`wand${equipped.data().wand.id}`];
+                itemRow.addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('equippedSword-btn')
+                        .setEmoji('🪄')
+                        .setStyle(ButtonStyle.Primary)
+                        .setLabel(wand.name),
+                );
+            }
+            else {
+                itemRow.addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('equippedSword-btn')
+                        .setEmoji('❎')
+                        .setStyle(ButtonStyle.Secondary)
+                        .setLabel('Nada equipado'),
+                );
+            }
+        }
+        if (equipped.data().armorPlate?.id) {
+            console.log('Algo equipado');
+            const armorPlate = equipment.data().armorPlates[`armorPlate${equipped.data().armorPlate.id}`];
+            itemRow.addComponents(
+                new ButtonBuilder()
+                    .setCustomId('equippedArmorPlate-btn')
+                    .setEmoji('🛡️')
+                    .setStyle(ButtonStyle.Primary)
+                    .setLabel(armorPlate.name),
+            );
         }
         else {
             itemRow.addComponents(
                 new ButtonBuilder()
-                    .setCustomId('equippedSword-btn')
+                    .setCustomId('equippedArmorPlate-btn')
                     .setEmoji('❎')
                     .setStyle(ButtonStyle.Secondary)
                     .setLabel('Nada equipado'),
@@ -160,6 +227,84 @@ module.exports = {
             return;
         }
         if (interaction.customId.includes('inventorySwordsModal')) {
+            const itemRow = await equippedButton(interaction);
+
+            const idSplit = interaction.customId.split('-');
+            const page = Number(idSplit[ 1 ].match(/\d+/g)[ 0 ]);
+
+            const equipment = await getDoc(doc(db, interaction.user.id, 'PlayerInfo/Inventory/Equipment'));
+            if (equipment.exists()) {
+                const items = equipment.data().swords;
+                const itemsArray = Object.values(items).filter(element => (typeof element != 'number'));
+                await pagination('inventorySwords', itemsArray, page, interaction.user).then(results => {
+                    interaction.update({ embeds: [ results.embed ], components: [ results.paginationRow, itemRow, results.selectMenuRow ] });
+                });
+            }
+            return;
+        }
+        if (interaction.customId.includes('wandsInventoryEnchanterModal')) {
+            console.log('its reacghin here');
+            const playerInfo = await getDoc(doc(db, interaction.user.id, 'PlayerInfo'));
+            let classSignatureWeapon = 'luisin';
+
+            if (playerInfo.exists()) {
+                switch (playerInfo.data().class) {
+                    case 'warrior':
+                        classSignatureWeapon = 'swords';
+                        break;
+                    case 'enchanter':
+                        classSignatureWeapon = 'wands';
+                        break;
+                    case 'archer':
+                        classSignatureWeapon = 'bows';
+                        break;
+                    default:
+                        break;
+                }
+            }
+            const categories = [ classSignatureWeapon, 'armorPlates' ];
+            if (playerInfo.data().class == 'enchanter') {
+                categories.push('abilityOrbs');
+            }
+            const categoriesButton = {
+                abilityOrbs: 'Orbes de Habilidad',
+                swords: 'Espadas',
+                wands: 'Varitas',
+                bows: 'Arcos',
+                armorPlates: 'Armaduras',
+                abilityOrbsEmoji: Icons.AbilityOrb,
+                swordsEmoji: Icons.ATK,
+                armorPlatesEmoji: Icons.Armor,
+                wandsEmoji: Icons.Wands,
+                bowsEmoji: Icons.Bows,
+            };
+            console.log(categories);
+            const categoryRow = new ActionRowBuilder();
+            categories.forEach(elmnt => {
+                categoryRow.addComponents(
+                    new ButtonBuilder()
+                        .setCustomId(`${elmnt}-view-btn`)
+                        .setEmoji(`${categoriesButton[elmnt + 'Emoji']}`)
+                        .setStyle(ButtonStyle.Primary)
+                        .setLabel(categoriesButton[elmnt]),
+                );
+            });
+            const itemRow = await equippedButton(interaction, playerInfo.data().class);
+
+            const idSplit = interaction.customId.split('-');
+            const page = Number(idSplit[ 1 ].match(/\d+/g)[ 0 ]);
+
+            const equipment = await getDoc(doc(db, interaction.user.id, 'PlayerInfo/Inventory/Equipment'));
+            if (equipment.exists()) {
+                const items = equipment.data().wands;
+                const itemsArray = Object.values(items).filter(element => (typeof element != 'number'));
+                await pagination('wandsInventoryEnchanter', itemsArray, page, interaction.user).then(results => {
+                    interaction.update({ embeds: [ results.embed ], components: [ results.paginationRow, itemRow, results.selectMenuRow, categoryRow ] });
+                });
+            }
+            return;
+        }
+        if (interaction.customId.includes('inventoryBowsModal')) {
             const itemRow = await equippedButton(interaction);
 
             const idSplit = interaction.customId.split('-');

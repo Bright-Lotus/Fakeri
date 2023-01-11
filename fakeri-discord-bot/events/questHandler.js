@@ -11,6 +11,7 @@ module.exports = {
     name: 'messageCreate',
     once: false,
     execute: async function(message) {
+        if (message.content.lenght < 4) return;
         for (let index = 0; index < 2; index++) {
 
             const client = message.client;

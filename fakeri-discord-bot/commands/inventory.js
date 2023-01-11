@@ -140,7 +140,7 @@ async function inventory(interaction, category, args) {
                 if (category == 'armorPlates') {
                     if (equipped.data().armorPlate?.id) {
                         console.log('Algo equipado');
-                        const armorPlate = equipment.data().armorPlates[`armorPlate${equipped.data().bow.id}`];
+                        const armorPlate = equipment.data().armorPlates[`armorPlate${equipped.data().armorPlate.id}`];
                         itemRow.addComponents(
                             new ButtonBuilder()
                                 .setCustomId('equippedArmorPlate-btn')
@@ -233,6 +233,7 @@ async function inventory(interaction, category, args) {
             if (args?.orbPosition) {
                 functionArgs.orbPosition = args.orbPosition;
             }
+            console.log(`${category}Inventory${classStr}`);
             await pagination(`${category}Inventory${classStr}${args?.action?.toUpperCase() || ''}`, itemsArray, 1, interaction.user, functionArgs).then(results => {
                 if (category == 'abilityOrbs') {
                     if (args?.action == 'equip') {

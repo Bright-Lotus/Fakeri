@@ -61,7 +61,7 @@ async function keywordHandler(keyword, keywordSubtype, enemy, user, args) {
             if (dodgeChance) {
                 return Promise.resolve({ dodged: true });
             }
-            break;
+            return Promise.resolve({ damageDone: 0, reducedDmgEmoji: formatEmoji(Icons.Elusive) });
         }
 
         case 'Hardened': {
