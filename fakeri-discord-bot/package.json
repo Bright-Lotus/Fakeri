@@ -19,7 +19,7 @@
     "dominant-color": "^0.0.1",
     "dotenv": "^16.0.3",
     "fast-average-color": "^9.1.1",
-    "fast-average-color-node": "^2.4.0",
+    "fast-average-color-node": "^2.7.0",
     "ffmpeg": "^0.0.4",
     "ffprobe-static": "^3.1.0",
     "figlet": "^1.5.2",
